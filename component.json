@@ -5,35 +5,16 @@
   "version": "0.0.1",
   "keywords": [],
   "dependencies": {
-    "ksanaforge/boot": "*",
-    "brighthas/bootstrap": "*",
-    "ksana/document": "*",
-    "ksanaforge/stacktoc": "*",
-    "ksanaforge/fileinstaller": "*",
-    "ksanaforge/checkbrowser": "*",
-    "ksanaforge/swipe": "*",
-    "ksanaforge/defaultmain": "*",
-    "ksanaforge/defaultresultlist": "*",
-    "ksanaforge/defaultshowtext": "*",
-    "ksanaforge/dictionary": "*",
-    "ksanaforge/htmlfs": "*",
-    "_2048/main": "*",
-    "_2048/comp1": "*"
   },
   "development": {},
   "paths": [
-    "components",
-    "../components",
-    "../../components",
-    "../node_modules/",
-    "../../node_modules/"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "_2048.js",
   "scripts": [
-    "index.js"
+    "_2048.js"
   ],
   "styles": [
-    "index.css"
+    "_2048.css"
   ]
 }

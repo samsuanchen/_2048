@@ -1,13 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=1"/>
-<script src="jquery.js"></script>
-<script src="react-with-addons.js"></script>
-<link type="text/css" rel="stylesheet" href="build.css">
-</head>
-<div id="main"></div>
-<script src="build.js"></script>
-</html>
+<!--"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">-->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>_2048 Swipe</title>
+<link rel="stylesheet" type="text/css" href="_2048.css">
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jquery.touchSwipe.min.js"></script>
+</head><body>
+<h3>這 2048 遊戲 開始後<br/>
+	可在 鍵盤上 按 <font color=blue>↑ ↓ ← → 鍵</font> 或 <font color=blue>w s a d 鍵</font><br/>
+	或 在 手機 / ipad 手指向 <font color=blue>上下左右 滑動</font><br/>
+	表格中 每個數值 都會 依 指定方向 移動<br/>
+	遇到 相同數值 就 相加 併成 一個新數值<br/>
+	累計 每個相加數值 即 2048 遊戲的 得分
+</h3>
+<table width=100%><tr width=100%><th width=100%>
+	<table width=100% border=1><tr width=100%><th width=40%>手指 滑動 或 按鍵</th>
+		<th width=20%><span id="score">總分0</span></th>
+		<th width=20%><span id="max">最高0</span></th>
+		<th><span id="time">時間0</span></th>
+	</tr></table>
+</th></tr><tr><th><span id="game-panel">
+  <div class="div-round" id="box-main">
+	<div class="div-round box-lm" id="box0"></div><div class="div-round box-lm" id="box1"></div>
+	<div class="div-round box-lm" id="box2"></div><div class="div-round box-lm" id="box3"></div>
+	<div class="div-round box-lm" id="box4"></div><div class="div-round box-lm" id="box5"></div>
+	<div class="div-round box-lm" id="box6"></div><div class="div-round box-lm" id="box7"></div>
+	<div class="div-round box-lm" id="box8"></div><div class="div-round box-lm" id="box9"></div>
+	<div class="div-round box-lm" id="boxa"></div><div class="div-round box-lm" id="boxb"></div>
+	<div class="div-round box-lm" id="boxc"></div><div class="div-round box-lm" id="boxd"></div>
+	<div class="div-round box-lm" id="boxe"></div><div class="div-round box-lm" id="boxf"></div>
+  </div>
+</span></th></tr><tr><th>
+	<table width=100% border=1><tr width=100%><th width=20% id='warning'>
+	<button id=  "btnGo" class="btn btn-primary" onClick=  "go()">開始</button></th>
+		<th><button class="btn btn-primary" onClick=   "toUp()">↑&nbsp;&nbsp;w</button></th>
+		<th><button class="btn btn-primary" onClick= "toLeft()">←&nbsp;&nbsp;a</button></th>
+		<th><button class="btn btn-primary" onClick="toRight()">→&nbsp;&nbsp;d</button></th>
+		<th><button class="btn btn-primary" onClick= "toDown()">↓&nbsp;&nbsp;s</button></th>
+	</tr></table>
+</th></tr></table>
+<script type="text/javascript" src="_2048.js"></script>
+</body></html>
