@@ -12,12 +12,12 @@ function init(){
 	clearInterval(t);
 	locations=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // 每格起始分數 0
 	$('#score')[0].style.background='white';
-	$('#box-main')[0].style.background='white';
+	$('#mainbox')[0].style.background='white';
 	nomore=score=time=0,paint();
 }
 function go(){
 	if(!nomore)
-		btnGo.innerText='重新 esc';
+		btnGo.innerText='重新 esc', hint.innerText='手 滑動 或 按鍵';
 	init();
 	t=setInterval(function (){$("#time").text(++time+"秒")},1000); // show time
 	newNumber(),newNumber(),paint();
@@ -46,7 +46,7 @@ function isEnd() {
 		if (isEndX() && isEndY()) {
 			clearInterval(t),nomore=1;
 			$('#score')[0].style.background='yellow';
-			$('#box-main')[0].style.background='#ffc';
+			$('#mainbox')[0].style.background='#ffc';
 		}
 	}
 }
@@ -150,7 +150,7 @@ function createLocation() { // 隨機生成 空格的位置陣列
 	}), n=L.length;
 	if(n) return L[Math.floor(Math.random()*n)];
 }
-$("html").swipe({ // 在整個網頁上檢測滑行方向
+$("#mainbox").swipe({ // 手指 在表格中 可向 上下左右 滑動
 	swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
 	  if (nomore) return;
 	  if (direction==='up'   ) toUp   (); else
@@ -161,14 +161,24 @@ $("html").swipe({ // 在整個網頁上檢測滑行方向
 });
 window.boxs=[];
 for(var i=0;i<16;i++)window.boxs.push(document.getElementById('box'+i.toString(16)));
-function paint() {
+function paint() { // 更新畫面
 	boxs.forEach(function(b,i){
 		var L=locations[i], index=L===0?0:(L.toString(2).length-1);
 		b.innerText=L?L:"";
 		b.style.background=colors[index];
 	});
-	$("#score").text("總分" + score);
+	$("#score").text("得分" + score);
 	if(score>max) max = score, localStorage.setItem('max2048',max);
 	$("#max").text("最高" + max);
 	isEnd();
 }
+vm.exec(
+ 'code get function(){/* get ( obj <attr> -- val ) 例: box1 get id */'+
+ 'var a=vm.dStack.pop(),t=vm.nextToken();'+
+ 'var v=Array.isArray(a)?a.map(function(o){return o?o[t]:""}):a[t];'+
+ 'vm.dStack.push(v);}end-code'
+);
+// set ( val obj <attr> -- ) // 例如: val box1 set attr 
+vm.exec(
+ 'code set function(){vm.dStack.pop()[vm.nextToken()]=vm.dStack.pop();}end-code'
+);

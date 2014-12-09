@@ -215,15 +215,17 @@ function newNumber(){ // 隨機在某空格產生 2 或 4
 	if(p!=undefined) locations[p]=createNum(); // p ccould be 0
 }
 function init(){
+	clearInterval(t);
 	locations=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // 每格起始分數 0
-	warning.classList.remove('nomore');
+	$('#score')[0].style.background='white';
+	$('#box-main')[0].style.background='white';
 	nomore=score=time=0,paint();
 }
 function go(){
 	if(!nomore)
 		btnGo.innerText='重新 esc';
 	init();
-	t=setInterval(function (){$("#time").text("時間"+(++time)+"秒")},1000); // show time
+	t=setInterval(function (){$("#time").text(++time+"秒")},1000); // show time
 	newNumber(),newNumber(),paint();
 	window.onkeydown=function(e){
 		if(nomore) return;
@@ -249,7 +251,8 @@ function isEnd() {
 	if (locations.indexOf(0)<0) { // 沒有空格了
 		if (isEndX() && isEndY()) {
 			clearInterval(t),nomore=1;
-			warning.classList.add('nomore');
+			$('#score')[0].style.background='yellow';
+			$('#box-main')[0].style.background='#ffc';
 		}
 	}
 }
