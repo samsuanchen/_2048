@@ -111,8 +111,9 @@ function getArrayRight(j){ var r=[],i;
 function putArrayRight(j,r){ var k=0,i;
 	for(i=3; i>=0; i--) locations[i+j*4]=r[k++];
 }
-function getArrayLeft(j){ var r=[],i;
-	for(i=0; i<4; i++) r.push(locations[i+j*4]); return r;
+function getArrayLeft(j){//var r=[],i;
+	//for(i=0; i<4; i++) r.push(locations[i+j*4]); return r;
+	return locations.slice(j*4,j*4+4);
 }
 function putArrayLeft(j,r){ var k=0;
 	for(var i=0; i<4; i++)
