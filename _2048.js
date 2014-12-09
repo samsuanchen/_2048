@@ -121,25 +121,22 @@ function putArrayLeft(j,r){ var k=0;
 }
 function makeArray(r) { var n,i,j,m; // 集中並加總
 	if (r[0]+r[1]+r[2]+r[3]===0) return r; // 空格列
-	n=4; while(!r[n-1])n--;
-	for(i=0;i<n-1;i++){
-		if(r[i]){
-			for(j=i+1;j<n;j++){
-				if(r[j]){
-					if(r[i]===r[j])
-						score+=r[i]*=2,r[j]=0; // 相同數值 加總
-					else j--;
-					break
+	n=4; while(!r[n-1])n--; // 檢視 n 從 4 到 0, 直到 r[n-1] 有數值
+	for(i=0;i<n-1;i++){ // 檢視 i 從 0 到 n-2
+		if(r[i]){ 		// 直到 r[i] 有數值
+			for(j=i+1;j<n;j++){ // 檢視 j 從 i+1 到 n-1
+				if(r[j]){ 		// 直到 r[j] 有數值
+					if(r[i]===r[j]){			// 若 r[i]=r[j]
+						score+=r[i]*=2,r[j]=0;	// r[i]=兩樹相加, r[j]=0
+					} else j--; // j loop 還會自動再加 1
+					break;
 				}//if
 			}//for j
-			i=j;
+			i=j; // i loop 還會自動再加 1
 		}//if
 	}//for i
-	for(i=m=0;i<n;i++)
-		if(r[i])
-			r[m++]=r[i]; // 保留 非 0 數值
-	while(m<4)
-		r[m++]=0; // 補 0
+	for(i=m=0;i<n;i++) if(r[i]) r[m++]=r[i]; // 依序 非 0 數值
+	while(m<4) r[m++]=0; // 以 0 補足 4 個
 	return r;
 }
 function createNum(){ return Math.random()<0.8?2:4; } // 隨機生成 2 或 4
