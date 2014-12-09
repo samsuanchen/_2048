@@ -46,7 +46,7 @@ function isEnd() {
 		if (isEndX() && isEndY()) {
 			clearInterval(t),nomore=1;
 			$('#score')[0].style.background='yellow';
-			$('#mainbox')[0].style.background='#ffc';
+			$('#mainbox')[0].style.background='#fcc';
 		}
 	}
 }
