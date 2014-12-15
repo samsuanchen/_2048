@@ -222,19 +222,29 @@ vm.exec(
 	' dStack.push(parseInt(c1.getAttribute(\'r\')));}end-code\n'+
 	'code ma function(){ /* ma ( -- xmax ) */\n'+
 	' dStack.push(svg.clientWidth-parseInt(c1.getAttribute(\'r\')));}end-code\n'+
-	'code cx@ function(){ /* cx@ ( -- cx ) */\n'+
+	'code Cx@ function(){ /* Cx@ ( -- Cx ) */\n'+
 	' dStack.push(parseInt(c1.getAttribute(\'cx\')));}end-code\n'+
-	'code dx@ function(){ /* dx@ ( -- dx ) */\n'+
+	'code Dx@ function(){ /* Dx@ ( -- Dx ) */\n'+
 	' dStack.push(parseInt(c1.getAttribute(\'dx\')));}end-code\n'+
-	'code cx! function(){ /* cx! ( cx -- ) */\n'+
+	'code Cx! function(){ /* Cx! ( Cx -- ) */\n'+
 	' c1.setAttribute(\'cx\',dStack.pop());}end-code\n'+
+	'code Cx+! function(){ /* Cx+! ( Dx -- ) */\n'+
+	' c1.setAttribute(\'cx\',parseInt(c1.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
+	'code Dx! function(){ /* Dx! ( Dx -- ) */\n'+
+	' c1.setAttribute(\'dx\',dStack.pop());}end-code\n'+
+	'code cx@ function(){ /* cx@ ( -- cx ) */\n'+
+	' dStack.push(parseInt(c2.getAttribute(\'cx\')));}end-code\n'+
+	'code dx@ function(){ /* dx@ ( -- dx ) */\n'+
+	' dStack.push(parseInt(c2.getAttribute(\'dx\')));}end-code\n'+
+	'code cx! function(){ /* cx! ( cx -- ) */\n'+
+	' c2.setAttribute(\'cx\',dStack.pop());}end-code\n'+
+	'code cx+! function(){ /* cx+! ( dx -- ) */\n'+
+	' c2.setAttribute(\'cx\',parseInt(c2.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
 	'code dx! function(){ /* dx! ( dx -- ) */\n'+
-	' /* 例1: vm.exec("1 dx! w@ for 20 ms cx@ dx@ + cx! next") */\n'+
-	' /* 例2: vm.exec("50 cx! 1 dx! begin w@ for 20 ms cx@ dx@ + cx! next 0 dx@ - dx! again") */\n'+
-	' c1.setAttribute(\'dx\',dStack.pop());}end-code');
-vm.exec('code 0< function(){dStack.push(dStack.pop()<0)}end-code');
+	' /* 例1: vm.exec("1 Dx! ma for 20 ms Dx@ Cx+! next") */\n'+
+	' /* 例2: vm.exec("50 Cx! 1 Dx! begin ma for 20 ms Dx@ Cx+! next 0 Dx@ - Dx! again") */\n'+
+	' c2.setAttribute(\'dx\',dStack.pop());}end-code');
 vm.exec('code > function(){dStack.push(dStack.pop()<dStack.pop())}end-code');
 vm.exec('code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code');
-vm.exec('code or function(){dStack.push(dStack.pop()||dStack.pop())}end-code');
-vm.exec('code swap function(){var a=dStack.pop(),b=dStack.pop();dStack.push(a),dStack.push(b)}end-code');
-vm.exec("mi cx! 1 dx! begin 20 ms cx@ dx@ + dup cx! dup mi < swap ma > or if 0 dx@ - dx! then again")
+vm.exec("mi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ mi < Cx@ ma > or if 0 Dx@ - Dx! then again")
+vm.exec("mi cx! 1 dx! begin 15 ms dx@ cx+! cx@ mi < cx@ ma > or if 0 dx@ - dx! then again")

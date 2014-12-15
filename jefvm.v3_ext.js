@@ -308,7 +308,11 @@ vm.addWord('repeat',function () {
 //////////////////////////////////////////////////////////////////////////////////////////// v3
 vm.addWord('ms',function (n) {
   var m= n===undefined ? vm.dStack.pop() : n;
-  vm.waiting=1, vm.msTime=setTimeout(vm.resumeExec,m);
+  var t={tib:vm.tib,nTib:vm.nTib,tob:vm.tob,uob:vm.uob};
+  vm.waiting=1, vm.msTime=setTimeout(function(){
+    vm.tib=t.tib,vm.nTib=t.nTib,vm.tob=t.tob,vm.uob=t.uob;
+    vm.resumeExec()
+  },m);
 });
 vm.addWord('append',function(){var d,t,o,a,v;
   d=vm.dStack.pop(), t=vm.nextToken(), vm[t]=o=d.append(t), a=vm.nextToken();

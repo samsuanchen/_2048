@@ -201,7 +201,7 @@ function JeForthVM() {
 			console.log(vm.out), vm.out='';
 		}
     }
-    var lastCmd='';
+    var lastCmd='',tasks=[];
     function exec(cmd){		// source code interpreting
     	if(cmd!==lastCmd)
 			lastCmd=cmd, vm.cmds.push(cmd), vm.iCmd=vm.cmds.length;	// for tracing only
