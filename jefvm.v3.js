@@ -81,7 +81,7 @@ function JeForthVM() {
     }
     function compile(v) {	// compile v to code area									//	v2
 		var c= v===undefined ? vm.cArea[vm.ip++] : v;									//	v2
-		cr('compile '+JSON.stringify(c));			// for tracing only					//	v2
+	//	cr('compile '+JSON.stringify(c));			// for tracing only					//	v2
 		vm.cArea.push(c);																//	v2
     }																					//	v2
     function compileCode(name,v) {	// compile named word to code area					//	v2
@@ -131,11 +131,10 @@ function JeForthVM() {
           panic('error execute:\t'+w+' ????');						// w is not a word
 		}
     }
-    function data(tkn){																	//	v1
-		var c=tkn.charAt(0), n, t;														//	v1
-		if(typeof vm[tkn]!=='undefined'){
-			return vm[tkn]; // vm 屬性
-		}
+    function extData(tkn){
+    }
+    function extQuotedStr(tkn){
+    	var c=tkn.charAt(0);
 		if(c==='"'){																	//	v1
 			t=vm.tib.substr(0,vm.nTib-1);												//	v1
 			var L=Math.max(t.lastIndexOf(' '),t.lastIndexOf('\t'))+1;	// current "	//	v1
@@ -151,20 +150,19 @@ function JeForthVM() {
 		if(c==="'" && c===tkn.charAt(tkn.length-1)){									//	v1
 			return tkn.substr(1,tkn.length-2);		// 'abc' return string abc no space //	v1
 		}
-		if(c==='$'){								// 20141209 sam
-			n=parseInt(tkn.substr(1),16);			// 20141209 sam
-			if(c+n.toString(16)!==tkn) return;		// 20141209 sam
-			return n;								// 20141209 sam
-		}											// 20141209 sam
-		if(vm.base!==10){							// 20141209 sam
-			n=parseInt(tkn,vm.base);				// 20141209 sam
-			if(n.toString(vm.base)!==tkn) return;	// 20141209 sam
-			return n;								// 20141209 sam
-		}											// 20141209 sam
-		n=parseFloat(tkn);							// 20141209 sam
-		if(n.toString()===tkn) return n;			// 20141209 sam												//	v1
-		if(eval('typeof '+tkn)!=='undefined'){		// 20141209 sam
-			return eval(tkn);	// js value			// 20141209 sam
+		return extData(tkn);
+	}
+    function extNum(tkn){
+		if(tkn.charAt(0)==='$'){
+			n=parseInt(tkn.substr(1),16);
+			if('$'+n.toString(16)===tkn) return n;	// hexa decimal integer number
+		}
+		if(vm.base===10){
+	    	n=parseFloat(tkn);
+			if(n.toString()===tkn) return n; 		// decimal floating number
+		} else {
+			n=parseInt(tkn,vm.base);
+			if(n.toString(vm.base)===tkn) return n; // any based integer numbe
 		}
     }																					//	v1
 	function resumeExec(){		// resume outer source code interpreting loop			//	v3
@@ -174,12 +172,16 @@ function JeForthVM() {
             resumeCall();		// resume inner compiled code interpreting				//	v3
         }																				//	v3
     //  cr('resume times',++vm.rTimes);	// for tracing only                 			//	v3
-        do{	vm.token=nextToken();			// get a token
-			if (vm.token) {				// break if no more
-				var w=nameWord[vm.token];			// get word if token is already defined
-				if (w) execute(w);				// execute or compile the word
-				else {
-					var n=data(vm.token);												//	v1
+    	var tkn,n;
+        do{	vm.token=tkn=nextToken();	// get a token
+			if (tkn) {					// break if no more
+				var w=nameWord[tkn];	// get word if token is already defined
+				if (w) execute(w);		// execute or compile the word
+				else {	n=extNum(tkn);													//	v1
+					if(n===undefined)
+						n=extQuotedStr(tkn);											//	v1
+					if(n===undefined)
+						n=vm.extData(tkn);												//	v1
 					if(n===undefined){													//	v1
 						panic("? "+vm.token+" undefined"); return; // token undefined
 					}																	//	v1
@@ -245,6 +247,7 @@ function JeForthVM() {
 	vm.cArea=cArea        ;																//	v2
 	vm.rStack=rStack      ;																//	v2
 	vm.dStack=dStack      ;																//	v1
+	vm.extData=extData    ;																//	v3
 	vm.rTimes	= 0 ;	// resume times													//	v3
 	vm.waiting	= 0 ;	// flag of   waiting mode										//	v3
 	vm.compiling= 0 ;	// flag of compiling mode										//	v2

@@ -167,30 +167,17 @@ vm.addWord('doNext',function(){
 	if(i){vm.rStack.push(i-1),vm.ip+=vm.cArea[vm.ip];}
 	else vm.ip++;});
 vm.addWord('next',function(){ var o; // why this was broken ??????????????????
-	if(vm.compiling) o=vm.dStack.pop();
-	else o=vm.rStack[vm.rStack.length-1];
-	var	t=typeof o;
-	if(t!=="object" || o.name!=="for"){
-		vm.panic("no for to match next"); return;
-	}
-	if(vm.compiling){
-		vm.compileCode("doNext",o.at-vm.cArea.length-1); return;
-	}
-	if(--o.i>=0)vm.nTib=o.nTib;
-	else        vm.rStack.pop();
-},'immediate');
-vm.addWord('next',function(){ var o;
-	if(vm.compiling) o=vm.dStack.pop();
-	else o=vm.rStack[vm.rStack.length-1];
-	var	t=typeof o;
-	if(t!=="object" || o.name!=="for"){
-		vm.panic("no for to match next"); return;
-	}
-	if(vm.compiling){
-		vm.compileCode("doNext",o.at-vm.cArea.length-1); return;
-	}
-	if(--o.i>=0)vm.nTib=o.nTib;
-	else        vm.rStack.pop();
+  if(vm.compiling) o=vm.dStack.pop();
+  else o=vm.rStack[vm.rStack.length-1];
+  var t=typeof o;
+  if(t!=="object" || o.name!=="for"){
+    vm.panic("no for to match next"); return;
+  }
+  if(vm.compiling){
+    vm.compileCode("doNext",o.at-vm.cArea.length-1); return;
+  }
+  if(--o.i>=0)vm.nTib=o.nTib;
+  else        vm.rStack.pop();
 },'immediate');
 vm.addWord('drop',function(){vm.dStack.pop();});
 vm.addWord('dup',function(){vm.dStack.push(vm.dStack[vm.dStack.length-1]);});
@@ -204,15 +191,15 @@ vm.addWord('if',function(){
 		vm.compileCode("zBranch",0);
 		vm.dStack.push({name:"if",at:vm.cArea.length-1});return;
 	}
-	if(vm.dStack.pop)return;
+	if(vm.dStack.pop())return; // 20141215 sam fixed
 	var e=vm.tib.substr(vm.nTib).indexOf("else");
 	var t=vm.tib.substr(vm.nTib).indexOf("then");
-	if(e){
+	if(e>=0){
 		if(t && t<e)
 			vm.nTib+=t+4; // zbranch to then
 		else
 			vm.nTib+=e+4; // zbranch to else
-	} else if(t)
+	} else if(t>=0)
 		vm.nTib+=t+4; // zbranch to then
 	else
 		vm.panic("no else or then to match if");
@@ -228,7 +215,7 @@ vm.addWord('else',function () {var t;
    vm.cArea[i]=vm.cArea.length-i;return;
   }
   t=vm.tib.substr(vm.nTib).indexOf("then");
-  if(t) vm.nTib+=t+4; // branch to then
+  if(t>=0) vm.nTib+=t+4; // branch to then
   else vm.panic("there is no then to match else");
 },'immediate');
 vm.addWord('then',function () {
@@ -251,7 +238,7 @@ vm.addWord('aft',function () {var t;
    return;
   }
   t=vm.tib.substr(vm.nTib).indexOf("then");
-  if(t) vm.nTib+=t+4; // branch to then
+  if(t>=0) vm.nTib+=t+4; // branch to then
   else vm.panic("there is no then to match aft");
 },'immediate');
 vm.addWord('?dup',function () {var s=vm.dStack, d=s[s.length-1]; if(d)s.push(d);});
@@ -321,7 +308,7 @@ vm.addWord('repeat',function () {
 //////////////////////////////////////////////////////////////////////////////////////////// v3
 vm.addWord('ms',function (n) {
   var m= n===undefined ? vm.dStack.pop() : n;
-  vm.waiting=1, setTimeout(vm.resumeExec,m);
+  vm.waiting=1, vm.msTime=setTimeout(vm.resumeExec,m);
 });
 vm.addWord('append',function(){var d,t,o,a,v;
   d=vm.dStack.pop(), t=vm.nextToken(), vm[t]=o=d.append(t), a=vm.nextToken();
