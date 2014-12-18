@@ -1,8 +1,10 @@
+module.exports=function(vm) {
+
 //////////////////////////////////////////////////////////////////////////////////////// tools
-function equal(tag,value,expected){ var t; // asure value is exactly equal to expected
-  tests++;
+vm.equal=function equal(tag,value,expected){ var t; // asure value is exactly equal to expected
+  vm.tests++;
   if(value===expected)
-    passed++, vm.showTst(tag+' ok');
+    vm.passed++, vm.showTst(tag+' ok');
   else{
     var tv=typeof value, te=typeof expected;
     t='??? '+tag+' value:'+value+' not equal to expected:'+expected
@@ -17,7 +19,7 @@ function equal(tag,value,expected){ var t; // asure value is exactly equal to ex
       }).join(' '), vm.showErr(t);
   }
 }
-function trm(x){ // ignore all space, \t, or \n in string x
+vm.trm=function trm(x){ // ignore all space, \t, or \n in string x
     var y='';
     for(var i=0;i<x.length;i++){
         var c=x.charAt(i);
@@ -124,7 +126,7 @@ vm.addWord('g0',function(){LED2.write(0);});
 vm.addWord('y0',function(){LED1.write(0);});
 vm.addWord('b0',function(){LED4.write(0);});
 //////////////////////////////////////////////////////////////////////////////////////////// v1
-vm.addWord('.',function(){vm.type(),vm.type(" ");});
+vm.addWord('.',function(){vm.type.call(this),vm.type.apply(this,[" "]);});
 vm.addWord('+',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()+b);});
 vm.addWord('-',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()-b);});
 vm.addWord('*',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()*b);});
@@ -285,7 +287,7 @@ vm.addWord('until',function () {    var o;
   if(vm.dStack.pop()) vm.rStack.pop();
   else vm.nTib=o.nTib;
 },'immediate');
-vm.addWord('while',function () {    var s,o;
+vm.addWord('while',function () {    var s,o,t;
   s=vm.dStack,o=s[s.length-1],t=typeof o;
   if(t!=="object" || o.name!=="begin"){
         vm.panic("no begin to match while");return;
@@ -325,3 +327,5 @@ vm.addWord('append',function(){var d,t,o,a,v;
   }
 });
 
+
+};

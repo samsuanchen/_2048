@@ -1075,7 +1075,8 @@
       w.on(name, null);
       if (d3_event_dragSelect) style[d3_event_dragSelect] = select;
       if (suppressClick) {
-        function off() {
+      	var off=function() {// 20141216 sam
+      //function off() {	// 20141216 sam
           w.on(click, null);
         }
         w.on(click, function() {

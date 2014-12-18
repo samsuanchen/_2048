@@ -1,0 +1,1 @@
+node vm_tst.js

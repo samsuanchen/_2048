@@ -1,6 +1,6 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>_2048 Swipe</title>
-<link rel="stylesheet" type="text/css" href="_2048.css">
+<link rel="stylesheet" type="text/css" href="build.css">
 </head><body id='body'>
 <h4>鍵盤上 按 <font color=blue>↑ ↓ ← → 鍵</font> 或 <font color=blue>w s a d 鍵</font> 或<br/>
 	手指在 表格 之中 向 <font color=blue>上下左右 滑動</font><br/>
@@ -26,22 +26,27 @@
   </div>
 </span></th></tr><tr><th>
 	<table width=100% border=1><tr width=100%><th width=20% id='warning'>
-	<button id="btnGo" class="btn btn-primary" onClick=  "go()">開始</button></th>
-		<th><button class="btn btn-primary" onClick=   "toUp()">↑&nbsp;&nbsp;w</button></th>
-		<th><button class="btn btn-primary" onClick= "toLeft()">←&nbsp;&nbsp;a</button></th>
-		<th><button class="btn btn-primary" onClick="toRight()">→&nbsp;&nbsp;d</button></th>
-		<th><button class="btn btn-primary" onClick= "toDown()">↓&nbsp;&nbsp;s</button></th>
+	<button id="btnGo" class="btn btn-primary" onClick=  "_2048.go()">開始</button></th>
+		<th><button class="btn btn-primary" onClick=   "_2048.toUp()">↑&nbsp;&nbsp;w</button></th>
+		<th><button class="btn btn-primary" onClick= "_2048.toLeft()">←&nbsp;&nbsp;a</button></th>
+		<th><button class="btn btn-primary" onClick="_2048.toRight()">→&nbsp;&nbsp;d</button></th>
+		<th><button class="btn btn-primary" onClick= "_2048.toDown()">↓&nbsp;&nbsp;s</button></th>
 	</tr></table>
 </th></tr></table>
 <svg id='svg'>
 	<circle id='c1' r=50 cx=50 cy=50></circle>
-	<circle id='c2' r=9 cx=50 cy=50 fill='#700'></circle>
+	<circle id='c2' r=9 cx=50 cy=9 fill='#700'></circle>
 </svg>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="jquery.touchSwipe.min.js"></script>
+<script type="text/javascript" src="d3.js"></script>
+
+<!--
 <script type="text/javascript" src="jefvm.v3.js"></script>
 <script type="text/javascript" src="jefvm.v3_ext.js"></script>
 <script type="text/javascript" src="jefvm.v3_tst.js"></script>
-<script type="text/javascript" src="d3.js"></script>
 <script type="text/javascript" src="_2048.js"></script>
+-->
+
+<script type="text/javascript" src="build.js"></script>
 </body></html>

@@ -12,6 +12,9 @@
   "license": "MIT",
   "main": "_2048.js",
   "scripts": [
+    "jefvm.v3.js",
+    "jefvm.v3_ext.js",
+    "jefvm.v3_tst.js",
     "_2048.js"
   ],
   "styles": [

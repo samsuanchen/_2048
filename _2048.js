@@ -1,3 +1,5 @@
+
+
 // new2048.js // http://labs.rampinteractive.co.uk/touchSwipe/demos/Basic_swipe.html
 var max=localStorage.getItem('max2048'); max=max?parseInt(max):0; // 讀取 高分 紀錄
 $("#max").text("最高" + max);
@@ -17,7 +19,6 @@ function go(){
 	$('#mainbox')[0].style.background='white';
 	nomore=score=time=0, newNumber(), newNumber(), paint();
 	t=setInterval(function (){$("#time").text(++time+"秒")},1000); // show time
-	vm.exec("50 cx! 1 dx! begin w@ for 20 ms cx@ dx@ + cx! next 0 dx@ - dx! again");
 }
 function isEnd() {
 	if (locations.indexOf(0)<0 && isEndX() && isEndY()) { // 無 空格 也無法 上下左右 移動
@@ -43,9 +44,13 @@ function isEndY(){ var w,j,i; // 無法 上下 移動
 	}
 	return true;
 }
-function toDown() { if(!t)return; // 向下
+function toLeftPage() {
+}
+function toRightPage() {
+}
+function toLeft() { if(!t)return; // 向左
 	for(var i=0;i<4;i++){
-		var r=getArrayDown(i); r=processArray(r); putArrayDown(i,r);
+		var r=getArrayLeft(i); r=processArray(r); putArrayLeft(i,r);
 	}
 	newNumber(),paint();
 }
@@ -55,15 +60,15 @@ function toRight() { if(!t)return; // 向右
 	}
 	newNumber(),paint();
 }
-function toLeft() { if(!t)return; // 向左
-	for(var i=0;i<4;i++){
-		var r=getArrayLeft(i); r=processArray(r); putArrayLeft(i,r);
-	}
-	newNumber(),paint();
-}
 function toUp() { if(!t)return; // 向上
 	for(var i=0;i<4;i++){
 		var r=getArrayUp(i); r=processArray(r); putArrayUp(i,r);
+	}
+	newNumber(),paint();
+}
+function toDown() { if(!t)return; // 向下
+	for(var i=0;i<4;i++){
+		var r=getArrayDown(i); r=processArray(r); putArrayDown(i,r);
 	}
 	newNumber(),paint();
 }
@@ -119,7 +124,7 @@ function randomLocation() { // 隨機生成 空格的位置
 	}).filter(function(i){
 		return i!==undefined; // i could be 0
 	}); // L = 空格位置 的 陣列
-	n=L.length;
+	var n=L.length;
 	if(n) return L[Math.floor(Math.random()*n)];
 }
 $("#mainbox").swipe({ // 手指 在表格中 可向 上下左右 滑動
@@ -165,86 +170,102 @@ function paint() { // 更新畫面
 	$("#max").text("最高" + max);
 	isEnd();
 }
-vm.extData=function (tkn){
-	if( typeof vm[tkn]!=='undefined' )
-		return vm[tkn]; 						// vm attribute
-	if(tkn.match(/#([0-9a-f]{3}|[0-9a-f]{6})/))
-		return tkn;								// #hhh or #hhhhhh (rgb hexadecimal code string)
-	var t=eval('typeof '+tkn);
-	if(t==='undefined')
-		return;									// undefined
-	var v=d3.select('#'+tkn);
-	if(v[0][0]&&v[0][0].id===tkn)
-		return v;								// d3 object
-	return eval(tkn);							// js defined
-}
-vm.GET=function (obj,att){ var lst;
-	obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop();
-	if(typeof(obj)==='object'&&obj.attr)
-		return obj.attr(att);
-	lst=(Array.isArray(obj) ? obj : [obj]).map(function(o){
-		if(typeof(o)!=='object') return;
-		return o.attr ? o.attr(att) : o[att];
-	})
-	return lst.length===1 ? lst[0] : lst;
-}
-vm.SET=function (obj,att,val){
-	obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop(), val=val||vm.dStack.pop();
-	if(typeof(obj)!=='object')
-		return;
-	else {
-		if(obj.attr)
-			obj.attr(att,val);	// d3 object attribute setting
+
+var init=function(){
+	var JeForthVM=require("./jefvm.v3.js");
+	var vm=new JeForthVM();
+	require("./jefvm.v3_ext.js")(vm);
+	require("./jefvm.v3_tst.js")(vm);
+	window.vm=vm;
+	vm.extData=function (tkn){
+		if( typeof vm[tkn]!=='undefined' )
+			return vm[tkn]; 						// vm attribute
+		if(tkn.match(/#([0-9a-f]{3}|[0-9a-f]{6})/))
+			return tkn;								// #hhh or #hhhhhh (rgb hexadecimal code string)
+		var t=eval('typeof '+tkn);
+		if(t==='undefined')
+			return;									// undefined
+		var v=d3.select('#'+tkn);
+		if(v[0][0]&&v[0][0].id===tkn)
+			return v;								// d3 object
+		return eval(tkn);							// js defined
+	}
+	vm.GET=function (obj,att){ var lst;
+		obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop();
+		if(typeof(obj)==='object'&&obj.attr)
+			return obj.attr(att);
+		lst=(Array.isArray(obj) ? obj : [obj]).map(function(o){
+			if(typeof(o)!=='object') return;
+			return o.attr ? o.attr(att) : o[att];
+		})
+		return lst.length===1 ? lst[0] : lst;
+	}
+	vm.SET=function (obj,att,val){
+		obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop(), val=val||vm.dStack.pop();
+		if(typeof(obj)!=='object')
+			return;
 		else {
-			var lst=Array.isArray(obj)?obj:[obj];
-			if(Array.isArray(obj))
-				obj.forEach(function(o){
-					if(typeof o==='object') o[att]=val;
-				})
+			if(obj.attr) 
+				obj.attr(att,val);	// d3 object attribute setting
+			else {
+				var lst=Array.isArray(obj)?obj:[obj];
+				if(Array.isArray(obj))
+					obj.forEach(function(o){
+						if(typeof o==='object') o[att]=val;
+					})
+			}
 		}
 	}
+
+	vm.exec.apply(vm,[
+		'code get function(){ /* get ( obj <att> -- val ) */\n'+
+		' /* 例: vm.exec.apply(vm,["vm get words get name type"]) */\n'+
+		' var obj=vm.dStack.pop(), att=vm.nextToken(); vm.dStack.push(vm.GET(obj,att)); }end-code']);
+	vm.exec.apply(vm,[
+		'code geti function(){ /* geti ( obj <att> -- int ) */\n'+
+		' /* 例: vm.exec.apply(vm,["c1 geti cx 100 + type"]) */\n'+
+		' var obj=vm.dStack.pop(), att=vm.nextToken(); vm.dStack.push(parseInt(vm.GET(obj,att))); }end-code']);
+	vm.exec.apply(vm,[
+		'code set function(){var obj,att;/* set ( val obj <att> -- ) */\n'+
+		' /* 例1: vm.exec.apply(vm,["#ff8 c1 set fill 40 c1 set r 150 c1 set cx"]) */\n'+
+		' /* 例2: vm.exec.apply(vm,["\'background-color:yellow\' box1 set style"]) */\n'+
+		' obj=vm.dStack.pop(), att=vm.nextToken(), vm.SET(obj,att,vm.dStack.pop()); }end-code']);
+	vm.exec.apply(vm,[
+		'code xmi function(){ /* mi ( -- xmin ) */\n'+
+		' dStack.push(parseInt(c1.getAttribute(\'r\')));}end-code\n'+
+		'code xma function(){ /* ma ( -- xmax ) */\n'+
+		' dStack.push(svg.clientWidth-parseInt(c1.getAttribute(\'r\')));}end-code\n'+
+		'code Cx@ function(){ /* Cx@ ( -- Cx ) */\n'+
+		' dStack.push(parseInt(c1.getAttribute(\'cx\')));}end-code\n'+
+		'code Dx@ function(){ /* Dx@ ( -- Dx ) */\n'+
+		' dStack.push(parseInt(c1.getAttribute(\'dx\')));}end-code\n'+
+		'code Cx! function(){ /* Cx! ( Cx -- ) */\n'+
+		' c1.setAttribute(\'cx\',dStack.pop());}end-code\n'+
+		'code Cx+! function(){ /* Cx+! ( Dx -- ) */\n'+
+		' c1.setAttribute(\'cx\',parseInt(c1.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
+		'code Dx! function(){ /* Dx! ( Dx -- ) */\n'+
+		' c1.setAttribute(\'dx\',dStack.pop());}end-code\n'+
+		'code cx@ function(){ /* cx@ ( -- cx ) */\n'+
+		' dStack.push(parseInt(c2.getAttribute(\'cx\')));}end-code\n'+
+		'code dx@ function(){ /* dx@ ( -- dx ) */\n'+
+		' dStack.push(parseInt(c2.getAttribute(\'dx\')));}end-code\n'+
+		'code cx! function(){ /* cx! ( cx -- ) */\n'+
+		' c2.setAttribute(\'cx\',dStack.pop());}end-code\n'+
+		'code cx+! function(){ /* cx+! ( dx -- ) */\n'+
+		' c2.setAttribute(\'cx\',parseInt(c2.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
+		'code dx! function(){ /* dx! ( dx -- ) */\n'+
+		' /* 例1: vm.exec.apply(vm,["1 Dx! xma for 20 ms Dx@ Cx+! next"]) */\n'+
+		' /* 例2: vm.exec.apply(vm,["50 Cx! 1 Dx! begin xma for 20 ms Dx@ Cx+! next 0 Dx@ - Dx! again"]) */\n'+
+		' c2.setAttribute(\'dx\',dStack.pop());}end-code']);
+	vm.exec.apply(vm,['code > function(){dStack.push(dStack.pop()<dStack.pop())}end-code']);
+	vm.exec.apply(vm,['code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code']);
+	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
+	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
+	
 }
-vm.exec(
-	'code get function(){ /* get ( obj <att> -- val ) */\n'+
-	' /* 例: vm.exec("vm get words get name type") */\n'+
-	' var obj=vm.dStack.pop(), att=vm.nextToken(); vm.dStack.push(vm.GET(obj,att)); }end-code');
-vm.exec(
-	'code geti function(){ /* geti ( obj <att> -- int ) */\n'+
-	' /* 例: vm.exec("c1 geti cx 100 + type") */\n'+
-	' var obj=vm.dStack.pop(), att=vm.nextToken(); vm.dStack.push(parseInt(vm.GET(obj,att))); }end-code');
-vm.exec(
-	'code set function(){var obj,att;/* set ( val obj <att> -- ) */\n'+
-	' /* 例1: vm.exec("#ff8 c1 set fill 40 c1 set r 150 c1 set cx") */\n'+
-	' /* 例2: vm.exec("\'background-color:yellow\' box1 set style") */\n'+
-	' obj=vm.dStack.pop(), att=vm.nextToken(), vm.SET(obj,att,vm.dStack.pop()); }end-code');
-vm.exec(
-	'code mi function(){ /* mi ( -- xmin ) */\n'+
-	' dStack.push(parseInt(c1.getAttribute(\'r\')));}end-code\n'+
-	'code ma function(){ /* ma ( -- xmax ) */\n'+
-	' dStack.push(svg.clientWidth-parseInt(c1.getAttribute(\'r\')));}end-code\n'+
-	'code Cx@ function(){ /* Cx@ ( -- Cx ) */\n'+
-	' dStack.push(parseInt(c1.getAttribute(\'cx\')));}end-code\n'+
-	'code Dx@ function(){ /* Dx@ ( -- Dx ) */\n'+
-	' dStack.push(parseInt(c1.getAttribute(\'dx\')));}end-code\n'+
-	'code Cx! function(){ /* Cx! ( Cx -- ) */\n'+
-	' c1.setAttribute(\'cx\',dStack.pop());}end-code\n'+
-	'code Cx+! function(){ /* Cx+! ( Dx -- ) */\n'+
-	' c1.setAttribute(\'cx\',parseInt(c1.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
-	'code Dx! function(){ /* Dx! ( Dx -- ) */\n'+
-	' c1.setAttribute(\'dx\',dStack.pop());}end-code\n'+
-	'code cx@ function(){ /* cx@ ( -- cx ) */\n'+
-	' dStack.push(parseInt(c2.getAttribute(\'cx\')));}end-code\n'+
-	'code dx@ function(){ /* dx@ ( -- dx ) */\n'+
-	' dStack.push(parseInt(c2.getAttribute(\'dx\')));}end-code\n'+
-	'code cx! function(){ /* cx! ( cx -- ) */\n'+
-	' c2.setAttribute(\'cx\',dStack.pop());}end-code\n'+
-	'code cx+! function(){ /* cx+! ( dx -- ) */\n'+
-	' c2.setAttribute(\'cx\',parseInt(c2.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
-	'code dx! function(){ /* dx! ( dx -- ) */\n'+
-	' /* 例1: vm.exec("1 Dx! ma for 20 ms Dx@ Cx+! next") */\n'+
-	' /* 例2: vm.exec("50 Cx! 1 Dx! begin ma for 20 ms Dx@ Cx+! next 0 Dx@ - Dx! again") */\n'+
-	' c2.setAttribute(\'dx\',dStack.pop());}end-code');
-vm.exec('code > function(){dStack.push(dStack.pop()<dStack.pop())}end-code');
-vm.exec('code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code');
-vm.exec("mi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ mi < Cx@ ma > or if 0 Dx@ - Dx! then again")
-vm.exec("mi cx! 1 dx! begin 15 ms dx@ cx+! cx@ mi < cx@ ma > or if 0 dx@ - dx! then again")
+
+window._2048={go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
+window.x=function(cmd){vm.exec.apply(vm,[cmd])} // 例: x("#f00 c2 set fill")
+init();
+
+module.exports=_2048;
