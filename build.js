@@ -933,7 +933,7 @@ require.register("_2048/_2048.js", function(exports, require, module){
 // new2048.js // http://labs.rampinteractive.co.uk/touchSwipe/demos/Basic_swipe.html
 var max=localStorage.getItem('max2048'); max=max?parseInt(max):0; // 讀取 高分 紀錄
 $("#max").text("最高" + max);
-var/*格內數值*/locations,/*當前得分*/score,/*已用秒數*/time;
+var/*格內數值*/locations,/*當前得分*/score,/*剩餘秒數*/time;
 var t,nomore;
 var colors=["#FFF","#FBF","#BBB","#ACE","#1EF","#FFB","#CFA","#FDB","#F9F","#DDD","#99F","#9F9"];
 function showtime(){$("#time").text("時間"+(++time)+"秒");}
@@ -947,18 +947,19 @@ function go(){
 	locations=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // 每格起始分數 0
 	$('#score')[0].style.background='white';
 	$('#mainbox')[0].style.background='white';
-	nomore=score=time=0, newNumber(), newNumber(), paint();
-	t=setInterval(function (){$("#time").text(++time+"秒")},1000); // show time
+	nomore=score=0, time=300, newNumber(), newNumber(), paint();
+	t=setInterval(function (){$("#time").text("剩餘\n"+ time-- +"秒")},1000); // show time
 }
 function isEnd() {
-	if (locations.indexOf(0)<0 && isEndX() && isEndY()) { // 無 空格 也無法 上下左右 移動
+	if (time<=0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
+	// (逾時) 或者 (無 空格 且 無法 左右 橫向移動 也 無法 上下 縱向移動)
 		clearInterval(t),nomore=1;
 		$('#score')[0].style.background='yellow';
 		$('#mainbox')[0].style.background='#fcc';
 		return true
 	}
 }
-function isEndX(){ var w,j,i,k; // 無法 左右 移動
+function isEndH(){ var w,j,i,k; // 無法 左右 橫向移動
 	for (j=-1; ++j<4;) {
 		i=4*j, w=locations.slice(i,i+4);
 		for (k=-1; ++k<3;)
@@ -966,7 +967,7 @@ function isEndX(){ var w,j,i,k; // 無法 左右 移動
 	}
 	return true;
 }
-function isEndY(){ var w,j,i; // 無法 上下 移動
+function isEndV(){ var w,j,i; // 無法 上下 縱向移動
 	w = new Array();
 	for (j= 0; j<4; j++) {
 		for (i=0; i<3; i++)
@@ -1189,8 +1190,8 @@ var init=function(){
 		' c2.setAttribute(\'dx\',dStack.pop());}end-code']);
 	vm.exec.apply(vm,['code > function(){dStack.push(dStack.pop()<dStack.pop())}end-code']);
 	vm.exec.apply(vm,['code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code']);
-	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
-	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
+	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Ct! Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
+	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms ct! dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
 	
 }
 
