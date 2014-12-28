@@ -1200,7 +1200,7 @@ function go(){
 	nomore=score=0, time=300, newNumber(), newNumber(), paint();
 	tGo=setInterval(function (){
 		$("#time").html("剩餘<br/>"+ time-- +"秒");
-		if(!time) noMore();
+		if(time<0) noMore();
 	},1000); // show time
 	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
