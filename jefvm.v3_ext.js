@@ -308,13 +308,16 @@ vm.addWord('repeat',function () {
   vm.cArea[i]=vm.cArea.length-i;
 },'immediate');
 //////////////////////////////////////////////////////////////////////////////////////////// v3
+vm.msTime=[];                                   //  v2;
 vm.addWord('ms',function (n) {
   var m= n===undefined ? vm.dStack.pop() : n;
-  var t={tib:vm.tib,nTib:vm.nTib,tob:vm.tob,uob:vm.uob};
-  vm.waiting=1, vm.msTime=setTimeout(function(){
-    vm.tib=t.tib,vm.nTib=t.nTib,vm.tob=t.tob,vm.uob=t.uob;
-    vm.resumeExec()
+  var t={tib:vm.tib,nTib:vm.nTib,tob:vm.tob,uob:vm.uob,dStack:vm.dStack};
+  vm.waiting=1; var tt=setTimeout(function(){
+    vm.msTime.splice(vm.msTime.indexOf(tt),1);
+    vm.tib=t.tib,vm.nTib=t.nTib,vm.tob=t.tob,vm.uob=t.uob,vm.dStack=t.dStack;
+    vm.resumeExec.call(vm);
   },m);
+  vm.msTime.push(tt);
 });
 vm.addWord('append',function(){var d,t,o,a,v;
   d=vm.dStack.pop(), t=vm.nextToken(), vm[t]=o=d.append(t), a=vm.nextToken();

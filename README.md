@@ -4,7 +4,7 @@ _2048
 
 Array.prototype.insert=function(i,a){
 // 例1: [2,3,4].insert(0,1) ==> [1,2,3,4]
-// 例2: [1,2,3].insert(4,4) ==> [1,2,3,4]
+// 例2: [1,2,3].insert(3,4) ==> [1,2,3,4]
 	this.splice(i,0,a); return this;
 }
 Array.prototype.delete=function(i){
@@ -12,8 +12,8 @@ Array.prototype.delete=function(i){
 // 例2: [1,2,3,4].delete(3) ==> [1,2,3]
 	this.splice(i,1); return this;
 }
-Array.prototype.deleteFirst=function(a){
-// 例1: [1,2,3,2].deleteFirst(2) ==> [1,3,2]
+Array.prototype.delete=function(a){
+// 例1: [1,2,3,2].delete(2) ==> [1,3,2]
 	this.splice(this.indexOf(a),1); return this;
 }
 Array.prototype.deleteLast=function(a){

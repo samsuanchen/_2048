@@ -4,21 +4,12 @@
 var max=localStorage.getItem('max2048'); max=max?parseInt(max):0; // 讀取 高分 紀錄
 $("#max").text("最高" + max);
 var/*格內數值*/locations,/*當前得分*/score,/*剩餘秒數*/time;
-var t,nomore;
+var tGo,nomore;
 var colors=["#FFF","#FBF","#BBB","#ACE","#1EF","#FFB","#CFA","#FDB","#F9F","#DDD","#99F","#9F9"];
 function showtime(){$("#time").text("時間"+(++time)+"秒");}
 function newNumber(){ // 隨機在某空格產生 2 或 4
 	var p=randomLocation(); // p ccould be 0
 	if(p!==undefined) locations[p]=Math.random()<0.8?2:4;
-}
-function go(){
-	if(!nomore) btnGo.innerText='重新 esc', hint.innerText='手 滑動 或 按鍵';
-	clearInterval(t), clearTimeout(vm.msTime);
-	locations=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // 每格起始分數 0
-	$('#score')[0].style.background='white';
-	$('#mainbox')[0].style.background='white';
-	nomore=score=0, time=300, newNumber(), newNumber(), paint();
-	t=setInterval(function (){$("#time").text("剩餘\n"+ time-- +"秒")},1000); // show time
 }
 function isEnd() {
 	if (time<=0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
@@ -49,25 +40,25 @@ function toLeftPage() {
 }
 function toRightPage() {
 }
-function toLeft() { if(!t)return; // 向左
+function toLeft() { if(!tGo)return; // 向左
 	for(var i=0;i<4;i++){
 		var r=getArrayLeft(i); r=processArray(r); putArrayLeft(i,r);
 	}
 	newNumber(),paint();
 }
-function toRight() { if(!t)return; // 向右
+function toRight() { if(!tGo)return; // 向右
 	for(var i=0;i<4;i++){
 		var r=getArrayRight(i); r=processArray(r); putArrayRight(i,r);
 	}
 	newNumber(),paint();
 }
-function toUp() { if(!t)return; // 向上
+function toUp() { if(!tGo)return; // 向上
 	for(var i=0;i<4;i++){
 		var r=getArrayUp(i); r=processArray(r); putArrayUp(i,r);
 	}
 	newNumber(),paint();
 }
-function toDown() { if(!t)return; // 向下
+function toDown() { if(!tGo)return; // 向下
 	for(var i=0;i<4;i++){
 		var r=getArrayDown(i); r=processArray(r); putArrayDown(i,r);
 	}
@@ -171,7 +162,6 @@ function paint() { // 更新畫面
 	$("#max").text("最高" + max);
 	isEnd();
 }
-
 var init=function(){
 	var JeForthVM=require("./jefvm.v3.js");
 	var vm=new JeForthVM();
@@ -191,7 +181,7 @@ var init=function(){
 			return v;								// d3 object
 		return eval(tkn);							// js defined
 	}
-	vm.GET=function (obj,att){ var lst;
+	vm.Get=function (obj,att){ var lst;
 		obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop();
 		if(typeof(obj)==='object'&&obj.attr)
 			return obj.attr(att);
@@ -201,7 +191,7 @@ var init=function(){
 		})
 		return lst.length===1 ? lst[0] : lst;
 	}
-	vm.SET=function (obj,att,val){
+	vm.Set=function (obj,att,val){
 		obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop(), val=val||vm.dStack.pop();
 		if(typeof(obj)!=='object')
 			return;
@@ -221,51 +211,61 @@ var init=function(){
 	vm.exec.apply(vm,[
 		'code get function(){ /* get ( obj <att> -- val ) */\n'+
 		' /* 例: vm.exec.apply(vm,["vm get words get name type"]) */\n'+
-		' var obj=vm.dStack.pop(), att=vm.nextToken(); vm.dStack.push(vm.GET(obj,att)); }end-code']);
+		' var obj=vm.dStack.pop(), att=vm.nextToken.call(vm); vm.dStack.push(vm.Get(obj,att)); }end-code']);
 	vm.exec.apply(vm,[
 		'code geti function(){ /* geti ( obj <att> -- int ) */\n'+
 		' /* 例: vm.exec.apply(vm,["c1 geti cx 100 + type"]) */\n'+
-		' var obj=vm.dStack.pop(), att=vm.nextToken(); vm.dStack.push(parseInt(vm.GET(obj,att))); }end-code']);
+		' var obj=vm.dStack.pop(), att=vm.nextToken.call(vm); vm.dStack.push(parseInt(vm.Get(obj,att))); }end-code']);
 	vm.exec.apply(vm,[
 		'code set function(){var obj,att;/* set ( val obj <att> -- ) */\n'+
 		' /* 例1: vm.exec.apply(vm,["#ff8 c1 set fill 40 c1 set r 150 c1 set cx"]) */\n'+
 		' /* 例2: vm.exec.apply(vm,["\'background-color:yellow\' box1 set style"]) */\n'+
-		' obj=vm.dStack.pop(), att=vm.nextToken(), vm.SET(obj,att,vm.dStack.pop()); }end-code']);
+		' obj=vm.dStack.pop(), att=vm.nextToken.call(vm), vm.Set(obj,att,vm.dStack.pop()); }end-code']);
 	vm.exec.apply(vm,[
 		'code xmi function(){ /* mi ( -- xmin ) */\n'+
-		' dStack.push(parseInt(c1.getAttribute(\'r\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c1.getAttribute(\'r\')));}end-code\n'+
 		'code xma function(){ /* ma ( -- xmax ) */\n'+
-		' dStack.push(svg.clientWidth-parseInt(c1.getAttribute(\'r\')));}end-code\n'+
+		' vm.dStack.push(svg.clientWidth-parseInt(c1.getAttribute(\'r\')));}end-code\n'+
 		'code Cx@ function(){ /* Cx@ ( -- Cx ) */\n'+
-		' dStack.push(parseInt(c1.getAttribute(\'cx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c1.getAttribute(\'cx\')));}end-code\n'+
 		'code Dx@ function(){ /* Dx@ ( -- Dx ) */\n'+
-		' dStack.push(parseInt(c1.getAttribute(\'dx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c1.getAttribute(\'dx\')));}end-code\n'+
 		'code Cx! function(){ /* Cx! ( Cx -- ) */\n'+
-		' c1.setAttribute(\'cx\',dStack.pop());}end-code\n'+
+		' c1.setAttribute(\'cx\',vm.dStack.pop());}end-code\n'+
 		'code Cx+! function(){ /* Cx+! ( Dx -- ) */\n'+
-		' c1.setAttribute(\'cx\',parseInt(c1.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
+		' c1.setAttribute(\'cx\',parseInt(c1.getAttribute(\'cx\'))+vm.dStack.pop());}end-code\n'+
 		'code Dx! function(){ /* Dx! ( Dx -- ) */\n'+
-		' c1.setAttribute(\'dx\',dStack.pop());}end-code\n'+
+		' c1.setAttribute(\'dx\',vm.dStack.pop());}end-code\n'+
 		'code cx@ function(){ /* cx@ ( -- cx ) */\n'+
-		' dStack.push(parseInt(c2.getAttribute(\'cx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c2.getAttribute(\'cx\')));}end-code\n'+
 		'code dx@ function(){ /* dx@ ( -- dx ) */\n'+
-		' dStack.push(parseInt(c2.getAttribute(\'dx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c2.getAttribute(\'dx\')));}end-code\n'+
 		'code cx! function(){ /* cx! ( cx -- ) */\n'+
-		' c2.setAttribute(\'cx\',dStack.pop());}end-code\n'+
+		' c2.setAttribute(\'cx\',vm.dStack.pop());}end-code\n'+
 		'code cx+! function(){ /* cx+! ( dx -- ) */\n'+
-		' c2.setAttribute(\'cx\',parseInt(c2.getAttribute(\'cx\'))+dStack.pop());}end-code\n'+
+		' c2.setAttribute(\'cx\',parseInt(c2.getAttribute(\'cx\'))+vm.dStack.pop());}end-code\n'+
 		'code dx! function(){ /* dx! ( dx -- ) */\n'+
 		' /* 例1: vm.exec.apply(vm,["1 Dx! xma for 20 ms Dx@ Cx+! next"]) */\n'+
 		' /* 例2: vm.exec.apply(vm,["50 Cx! 1 Dx! begin xma for 20 ms Dx@ Cx+! next 0 Dx@ - Dx! again"]) */\n'+
-		' c2.setAttribute(\'dx\',dStack.pop());}end-code']);
+		' c2.setAttribute(\'dx\',vm.dStack.pop());}end-code']);
 	vm.exec.apply(vm,['code > function(){dStack.push(dStack.pop()<dStack.pop())}end-code']);
 	vm.exec.apply(vm,['code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code']);
-	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Ct! Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
-	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms ct! dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
-	
 }
-
-window._2048={go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
+function halt(){
+	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t)});
+}
+function go(){
+	halt();
+	if(!nomore) btnGo.innerText='重新 esc', hint.innerText='手 滑動 或 按鍵';
+	locations=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // 每格起始分數 0
+	$('#score')[0].style.background='white';
+	$('#mainbox')[0].style.background='white';
+	nomore=score=0, time=300, newNumber(), newNumber(), paint();
+	tGo=setInterval(function (){$("#time").text("剩餘\n"+ time-- +"秒")},1000); // show time
+	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
+	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
+}
+window._2048={halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
 window.x=function(cmd){vm.exec.apply(vm,[cmd])} // 例: x("#f00 c2 set fill")
 init();
 

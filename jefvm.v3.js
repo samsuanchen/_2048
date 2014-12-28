@@ -235,7 +235,7 @@ function JeForthVM() {
 	}
 	function doLit(){ // doLit ( -- n ) //												//	v2
 		this.dStack.push(this.cArea[this.ip++]);												//	v2
-	}																					//	v2
+	}			
 	this.cmds=[];
 	this.iCmd=-1;
 	this.showErr=showErr;
@@ -245,7 +245,8 @@ function JeForthVM() {
 	this.panic=panic        ;																//	v2
 	this.nextToken=nextToken;																//	v2
 	this.compileCode=compileCode;															//	v2
-	this.compile=compile    ;																//	v2
+	this.execute=execute    ;																//	v2
+	this.compile=compile    ;																	//	v2
 	this.nameWord=nameWord  ;																//	v2
 	this.ip=ip              ;																//	v2
 	this.cArea=cArea        ;																//	v2
