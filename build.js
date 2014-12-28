@@ -948,7 +948,7 @@ function newNumber(){ // 隨機在某空格產生 2 或 4
 function isEnd() {
 	if (time<=0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
 	// (逾時) 或者 (無 空格 且 無法 左右 橫向移動 也 無法 上下 縱向移動)
-		clearInterval(t),nomore=1;
+		halt(),nomore=1;
 		$('#score')[0].style.background='yellow';
 		$('#mainbox')[0].style.background='#fcc';
 		return true
@@ -1091,9 +1091,9 @@ function paint() { // 更新畫面
 		b.innerText=L?L:"";
 		b.style.background=colors[index];
 	});
-	$("#score").text("得分" + score);
+	$("#score").html("得分<br/>" + score);
 	if(score>max) max = score, localStorage.setItem('max2048',max);
-	$("#max").text("最高" + max);
+	$("#max").html("最高<br/>" + max);
 	isEnd();
 }
 var init=function(){
@@ -1195,7 +1195,10 @@ function go(){
 	$('#score')[0].style.background='white';
 	$('#mainbox')[0].style.background='white';
 	nomore=score=0, time=300, newNumber(), newNumber(), paint();
-	tGo=setInterval(function (){$("#time").text("剩餘\n"+ time-- +"秒")},1000); // show time
+	tGo=setInterval(function (){
+		$("#time").html("剩餘<br/>"+ time-- +"秒");
+		if(!time) halt();
+	},1000); // show time
 	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
 }
