@@ -945,12 +945,15 @@ function newNumber(){ // 隨機在某空格產生 2 或 4
 	var p=randomLocation(); // p ccould be 0
 	if(p!==undefined) locations[p]=Math.random()<0.8?2:4;
 }
+function noMore(){
+	halt(),nomore=1;
+	$('#score')[0].style.background='yellow';
+	$('#mainbox')[0].style.background='#fcc';
+}
 function isEnd() {
 	if (time<=0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
 	// (逾時) 或者 (無 空格 且 無法 左右 橫向移動 也 無法 上下 縱向移動)
-		halt(),nomore=1;
-		$('#score')[0].style.background='yellow';
-		$('#mainbox')[0].style.background='#fcc';
+		noMore();
 		return true
 	}
 }
@@ -1197,7 +1200,7 @@ function go(){
 	nomore=score=0, time=300, newNumber(), newNumber(), paint();
 	tGo=setInterval(function (){
 		$("#time").html("剩餘<br/>"+ time-- +"秒");
-		if(!time) halt();
+		if(!time) noMore();
 	},1000); // show time
 	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
