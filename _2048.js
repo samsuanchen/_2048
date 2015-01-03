@@ -1,5 +1,3 @@
-
-
 // new2048.js // http://labs.rampinteractive.co.uk/touchSwipe/demos/Basic_swipe.html
 var max=localStorage.getItem('max2048'); max=max?parseInt(max):0; // 讀取 高分 紀錄
 $("#max").text("最高" + max);
@@ -17,7 +15,7 @@ function noMore(){
 	$('#mainbox')[0].style.background='#fcc';
 }
 function isEnd() {
-	if (time<=0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
+	if (time<0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
 	// (逾時) 或者 (無 空格 且 無法 左右 橫向移動 也 無法 上下 縱向移動)
 		noMore();
 		return true
@@ -166,12 +164,19 @@ function paint() { // 更新畫面
 	isEnd();
 }
 var init=function(){
+	var t0,t1;
+	t0=new Date(), console.log('t0',t0);
+	setTimeout(
+		function(){
+			t1=new Date(), console.log('t1', t1, 'delta', t1.valueOf()-t0.valueOf())
+		},
+		1000
+	);
 	var JeForthVM=require("./jefvm.v3.js");
-	var vm=new JeForthVM();
+	window.vm=new JeForthVM();
 	require("./jefvm.v3_ext.js")(vm);
 	require("./jefvm.v3_tst.js")(vm);
-	window.vm=vm;
-	vm.extData=function (tkn){
+	vm.extData=vm.extData||function (tkn){
 		if( typeof vm[tkn]!=='undefined' )
 			return vm[tkn]; 						// vm attribute
 		if(tkn.match(/#([0-9a-f]{3}|[0-9a-f]{6})/))
@@ -184,7 +189,7 @@ var init=function(){
 			return v;								// d3 object
 		return eval(tkn);							// js defined
 	}
-	vm.Get=function (obj,att){ var lst;
+	vm.Get=vm.Get||function (obj,att){ var lst;
 		obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop();
 		if(typeof(obj)==='object'&&obj.attr)
 			return obj.attr(att);
@@ -210,7 +215,6 @@ var init=function(){
 			}
 		}
 	}
-
 	vm.exec.apply(vm,[
 		'code get function(){ /* get ( obj <att> -- val ) */\n'+
 		' /* 例: vm.exec.apply(vm,["vm get words get name type"]) */\n'+
@@ -255,7 +259,7 @@ var init=function(){
 	vm.exec.apply(vm,['code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code']);
 }
 function halt(){
-	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t)});
+	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t.timeout)});
 }
 function go(){
 	halt();
@@ -271,8 +275,7 @@ function go(){
 	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
 }
-window._2048={halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
+window._2048={init:init,halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
 window.x=function(cmd){vm.exec.apply(vm,[cmd])} // 例: x("#f00 c2 set fill")
-init();
 
 module.exports=_2048;

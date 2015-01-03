@@ -21,7 +21,6 @@
           port C.H.Ting flag demo for kids
     this is merely a kick off, everyone is welcome to enhance it. */
 function JeForthVM() {
-//	var vm		=this;
     var error	= 0	;	// flag to abort source code interpreting
 	var words	=[0];	// collect all words defined
 	var nameWord={ };	// nameWord[name]=word
@@ -29,19 +28,17 @@ function JeForthVM() {
 	var cArea	=[0];	// code area to hold high level colon definition				//	v2
 	var rStack	=[ ];	// return stack to return from high level colon definition		//	v2
 	var dStack	=[ ];	// data stack			
-	this.base=10;										//	v1
-//		this.base	=10 ;	// number conversion base										//	v1
-	var clear=this.clear=function(){ // clear data stack									//	v1
+	this.base=10 ;	// number conversion base										//	v1																			//	v1
+	this.uob='';	// user output buffer 				// 20141209 sam
+	this.clear=function(){ // clear data stack									//	v1
 		dStack=this.dStack=[];															//	v1
 	};
-	this.out='';																			//	v1
-	this.uob='';	// user output buffer 				// 20141209 sam
-	var cr=this.cr=function(msg){ var t=msg;	// get t=msg to print
-		if(t===undefined){
-			t=this.tob;
-			this.uob+=this.uob?'\r\n':'', this.uob+=t;	// 20141209 sam
-			this.lastTob=t, this.tob='';	// if no msg, get t=tob and clear tob
-		}
+	var cr=this.cr=function(msg){	// get t=msg to print
+		var t=this.tob||'';
+		this.tob='';
+		if(msg) t+=msg;
+		else this.lastTob=t;
+		this.uob+=(this.uob?'\n':'')+t;	// 20141209 sam
 		console.log(t);								// print t (fixed)
 	};
 	var intToString=function(t){
@@ -54,16 +51,16 @@ function JeForthVM() {
 		this.tob+=a;									// append t to terminal output buffer
     };
     function showErr(msg){var m=msg;
-		if(this.err) m='<'+this.err+'>'+m+'</'+this.err+'>'; cr(m);
+		if(this.err) m='<'+this.err+'>'+m+'</'+this.err+'>'; cr.apply(this,[m]);
     }
     function showTst(msg){var m=msg;
-		if(this.tst) m='<'+this.tst+'>'+m+'</'+this.tst+'>'; cr(m);
+		if(this.tst) m='<'+this.tst+'>'+m+'</'+this.tst+'>'; cr.apply(this,[m]);
     }
     function showOk (msg){var m=msg;
-		if(this.ok ) m='<'+this.ok +'>'+m+'</'+this.ok +'>'; cr(m);
+		if(this.ok ) m='<'+this.ok +'>'+m+'</'+this.ok +'>'; cr.apply(this,[m]);
     }
     function showInp(msg){var m=msg;
-		if(this.inp) m='<'+this.inp+'>'+m+'</'+this.inp+'>'; cr(m);
+		if(this.inp) m='<'+this.inp+'>'+m+'</'+this.inp+'>'; cr.apply(this,[m]);
     }
 	function panic(msg){	// clear tob, show error msg, and abort
 		showErr(msg),error=msg,this.compiling=0; }
@@ -83,7 +80,7 @@ function JeForthVM() {
     }
     function compile(v) {	// compile v to code area									//	v2
 		var c= v===undefined ? this.cArea[this.ip++] : v;									//	v2
-	//	cr('compile '+JSON.stringify(c));			// for tracing only					//	v2
+	//	cr.apply(this,['compile '+JSON.stringify(c)]);			// for tracing only					//	v2
 		this.cArea.push(c);																//	v2
     }																					//	v2
     function compileCode(name,v) {	// compile named word to code area					//	v2
@@ -95,35 +92,35 @@ function JeForthVM() {
     function resumeCall() {	// resume inner loop interpreting of compiled code			//	v3
 		while(this.ip && !this.waiting){													//	v3
 			var w=this.cArea[this.ip];														//	v3
-		//	cr(this.ip+': '+w.name+' '+this.dStack);										//	v3
+		//	cr.apply(this,[this.ip+': '+w.name+' '+this.dStack]);										//	v3
 			this.ip++, execute.apply(this,[w]);														//	v3
 		}																				//	v3
-	//	if(this.ip) cr('wait at '+this.ip);													//	v3
+	//	if(this.ip) cr.apply(this,['wait at '+this.ip]);													//	v3
     }																					//	v3
     function call(addr) {	// interpret compiled code at addr of cArea					//	v2
-	//	cr(this.ip+' --> rStack '+this.rStack.length+': '+this.rStack.join());				//	v2
+	//	cr.apply(this,[this.ip+' --> rStack '+this.rStack.length+': '+this.rStack.join()]);				//	v2
 		this.rStack.push(this.ip), this.ip=addr;												//	v2
 		resumeCall.call(this);																	//	v3
     }																					//	v2
     function exit() {	// return from colon definition									//	v2
 		this.ip=this.rStack.pop();// pop ip from return stack								//	v2
-	//	cr(this.ip+' <-- rStack '+this.rStack.length+': '+this.rStack.join());				//	v2
+	//	cr.apply(this,[this.ip+' <-- rStack '+this.rStack.length+': '+this.rStack.join()]);				//	v2
     }																					//	v2
     function execute(w){            // execute or compile a word
 		var immediate=w.immediate, compiling=immediate?0:this.compiling;					//	v2
 	//	var s=(compiling?'compile':'execute')+' word ';	// for tracing only				//	v2
 		if(typeof w==='object'){
 			if(compiling){																//	v2
-			//	cr('compile '+w.name);         // for tracing only          			//	v2
+			//	cr.apply(this,['compile '+w.name]);         // for tracing only          			//	v2
 				compile.apply(this,[w]);																//	v2
 			} else {																	//	v2
 				var x=w.xt, t=typeof x;
 			//	s+=w.id+':\t'+w.name;					// for tracing only
 				if(t==="function"){
-				//	cr(s+' primitive');					// for tracing only
+				//	cr.apply(this,[s+' primitive']);					// for tracing only
 					x.call(this);				// execute function x directly
 				} else if(t==="number"){												//	v2
-				//	cr(s+' colon at '+x);				// for tracing only				//	v2
+				//	cr.apply(this,[s+' colon at '+x]);				// for tracing only				//	v2
 					call.apply(this,[x]);
 				//	call(x);			// execute colon definition at x				//	v2
 				} else {
@@ -168,13 +165,14 @@ function JeForthVM() {
 			if(n.toString(this.base)===tkn) return n; // any based integer numbe
 		}
     }																					//	v1
-	function resumeExec(){		// resume outer source code interpreting loop			//	v3
-        this.waiting=0;                                                                   //  v3
+	function resumeExec(step,resumeDone){		// resume outer source code interpreting loop			//	v3
+        this.onDone=resumeDone;
+        this.waiting=this.steping||step;                                                                   //  v3
         if(this.ip){																		//	v3
-        //  cr('resumeCall at ',this.ip);
+        //  cr.apply(this,['resumeCall at ',this.ip]);
             resumeCall.call(this);		// resume inner compiled code interpreting				//	v3
         }																				//	v3
-    //  cr('resume times',++this.rTimes);	// for tracing only                 			//	v3
+    //  cr.apply(this,['resume times',++this.rTimes]);	// for tracing only                 			//	v3
     	var tkn,n;
         do{	this.token=tkn=nextToken.call(this);	// get a token
 			if (tkn) {					// break if no more
@@ -184,18 +182,18 @@ function JeForthVM() {
 					if(n===undefined)
 						n=extQuotedStr.apply(this,[tkn]);											//	v1
 					if(n===undefined)
-						n=this.extData(tkn);												//	v1
+						n=this.extData.apply(this,[tkn]);												//	v1
 					if(n===undefined){													//	v1
 						panic.apply(this,["? "+this.token+" undefined"]); return; // token undefined
 					}																	//	v1
 					if(this.compiling){													//	v2
-					//	cr('compile doLit '+n);
+					//	cr.apply(this,['compile doLit '+n]);
 						compileCode.apply(this,['doLit',n]);											//	v2
 	                }else																//	v2
 						dStack.push(n);													//	v1
 				}
 			}
-		//	cr('dStack ===> '+dStack.length+':\t['+dStack.join()+']');					//	v1
+		//	cr.apply(this,['dStack ===> '+dStack.length+':\t['+dStack.join()+']']);					//	v1
         } while(!this.waiting && this.nTib<this.tib.length);
 		if(!this.waiting && !this.compiling){
 			var ok=' ok';
@@ -203,22 +201,27 @@ function JeForthVM() {
 			cr.apply(this,[ok]);
 		//	console.log(this.out), this.out='';
 		}
+		if(resumeDone)
+			resumeDone();
+		var result=this.uob+this.tob;
+		this.uob=this.tob='';
+		return result;
     }
     var lastCmd='',tasks=[];
-    function exec(cmd){		// source code interpreting
+    function exec(cmd,step){		// source code interpreting
     	if(!cmd) return // 20141216 sam
     	if(cmd!==lastCmd)
 			lastCmd=cmd, this.cmds.push(cmd), this.iCmd=this.cmds.length;	// for tracing only
-		if(this.inp)this.showInp(cmd);
-		else cr('source input '+this.cmds.length+':\t'+cmd);			// for tracing only
+		if(this.inp)this.showInp.apply(this,[cmd]);
+		else cr.apply(this,['source input '+this.cmds.length+':\t'+cmd]);			// for tracing only
 		error=0, this.tib=cmd, this.nTib=0, this.tob=this.uob='';		// 20141209 sam
-		resumeExec.call(this), this.error=error;					// 20141209 sam	//	v3 
+		resumeExec.apply(this,[step]), this.error=error;					// 20141209 sam	//	v3 
         return this.uob+this.tob;				// return this.uob 	// 20141209 sam
 	}
 	function addWord(name,xt,immediate){	// 
 		var id=words.length, w={name:name,xt:xt,id:id}; words.push(w), nameWord[name]=w;
 		if(immediate)w.immediate=1;
-		cr('defined '+id+': '+name+(typeof xt==='function'? ' as primitive' : ''));
+		cr.apply(this,['defined '+id+': '+name+(typeof xt==='function'? ' as primitive' : '')]);
 	}
 	var endCode='end-code';
 	function code(){ // code <name> d( -- )	// low level definition as a new word
@@ -231,7 +234,7 @@ function JeForthVM() {
 		}
 		var txt='('+t.substr(0,i)+')';
 		var newXt=eval(txt);//eval(txt);
-		addWord(this.newName,newXt);
+		addWord.apply(this,[this.newName,newXt]);
 	}
 	function doLit(){ // doLit ( -- n ) //												//	v2
 		this.dStack.push(this.cArea[this.ip++]);												//	v2
@@ -267,6 +270,8 @@ function JeForthVM() {
 	this.exit =exit         ;
 	this.addWord=addWord    ;
 }
-if (typeof module!="undefined") module.exports=JeForthVM;
-//window.vm=new JeForthVM();
+if (typeof module!="undefined")
+	module.exports=JeForthVM;
+else
+	window.vm=new JeForthVM();
 //  vm is now creaded and ready to use.

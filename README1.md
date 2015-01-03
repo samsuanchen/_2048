@@ -14,7 +14,7 @@ A. 用 vm 如何執行 符式程序?
       1.     若是 此 token 為 指令名稱 則:
       1.1.      執行 此指令 (或將 此指令 編成 comiled code 放到 cArea)。
       2.     若是 此 token 可解讀 為 資料 則:
-      2.1.      將 此資料 放上 v****m.dStack (或將 此資料 編成 comiled code 放到 cArea)。
+      2.1.      將 此資料 放上 **vm.dStack** (或將 此資料 編成 comiled code 放到 cArea)。
       3.     若否 則: 視為錯誤 停止逐一解讀。
 
 例01: 用 vm.exec 執行 code, 定義 binary 指令。 使執行 binary 後, 可解讀 token 為 二進制整數。

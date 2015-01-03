@@ -17,8 +17,7 @@
 		<th width=20%><span id="max">最高<br/>0</span></th>
 		<th><span id="time">剩餘<br/>0秒</span></th>
 	</tr></table>
-</th></tr><tr><th><span id="game-panel">
-  <div class="round" id="mainbox">
+</th></tr><tr><th><span id="game-panel"><div class="round" id="mainbox">
 	<div class="round box" id="box0"></div><div class="round box" id="box1"></div>
 	<div class="round box" id="box2"></div><div class="round box" id="box3"></div>
 	<div class="round box" id="box4"></div><div class="round box" id="box5"></div>
@@ -27,28 +26,23 @@
 	<div class="round box" id="boxa"></div><div class="round box" id="boxb"></div>
 	<div class="round box" id="boxc"></div><div class="round box" id="boxd"></div>
 	<div class="round box" id="boxe"></div><div class="round box" id="boxf"></div>
-  </div>
-</span></th></tr><tr><th>
+  </div></span>
+</th></tr><tr><th>
 	<table width=100% border=1><tr width=100%><th width=20% id='warning'>
-	<button id="btnGo" class="btn btn-primary" onClick=  "_2048.go()">開始</button></th>
-		<th><button class="btn btn-primary" onClick="_2048.halt   ()">停</button></th>
-		<th><button class="btn btn-primary" onClick="_2048.toUp   ()">↑&nbsp;w</button></th>
-		<th><button class="btn btn-primary" onClick="_2048.toLeft ()">←&nbsp;a</button></th>
-		<th><button class="btn btn-primary" onClick="_2048.toRight()">→&nbsp;d</button></th>
-		<th><button class="btn btn-primary" onClick="_2048.toDown ()">↓&nbsp;s</button></th>
+	<button id="btnGo" class="btn btn-primary" onClick="_2048.go     ()">開始</button></th><th>
+	<button    class="btn btn-primary" onClick="_2048.halt   ()">停</button></th><th>
+	<button    class="btn btn-primary" onClick="_2048.toUp   ()">↑&nbsp;w</button></th><th>
+	<button    class="btn btn-primary" onClick="_2048.toLeft ()">←&nbsp;a</button></th><th>
+	<button    class="btn btn-primary" onClick="_2048.toRight()">→&nbsp;d</button></th><th>
+	<button    class="btn btn-primary" onClick="_2048.toDown ()">↓&nbsp;s</button></th>
 	</tr></table>
 </th></tr></table>
-<script>
-</script>
 <svg id='svg'>
 	<circle id='c1' r=50 cx=50 cy=50></circle>
 	<circle id='c2' r=9 cx=50 cy=9 fill='#700'></circle>
 </svg>
-<!--
-<script type="text/javascript" src="jefvm.v3.js"></script>
-<script type="text/javascript" src="jefvm.v3_ext.js"></script>
-<script type="text/javascript" src="jefvm.v3_tst.js"></script>
-<script type="text/javascript" src="_2048.js"></script>
--->
 <script type="text/javascript" src="build.js"></script>
+<script>
+	_2048.init();
+</script>
 </body></html>

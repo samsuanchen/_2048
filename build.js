@@ -227,7 +227,6 @@ require.register("_2048/jefvm.v3.js", function(exports, require, module){
           port C.H.Ting flag demo for kids
     this is merely a kick off, everyone is welcome to enhance it. */
 function JeForthVM() {
-//	var vm		=this;
     var error	= 0	;	// flag to abort source code interpreting
 	var words	=[0];	// collect all words defined
 	var nameWord={ };	// nameWord[name]=word
@@ -235,19 +234,17 @@ function JeForthVM() {
 	var cArea	=[0];	// code area to hold high level colon definition				//	v2
 	var rStack	=[ ];	// return stack to return from high level colon definition		//	v2
 	var dStack	=[ ];	// data stack			
-	this.base=10;										//	v1
-//		this.base	=10 ;	// number conversion base										//	v1
-	var clear=this.clear=function(){ // clear data stack									//	v1
+	this.base=10 ;	// number conversion base										//	v1																			//	v1
+	this.uob='';	// user output buffer 				// 20141209 sam
+	this.clear=function(){ // clear data stack									//	v1
 		dStack=this.dStack=[];															//	v1
 	};
-	this.out='';																			//	v1
-	this.uob='';	// user output buffer 				// 20141209 sam
-	var cr=this.cr=function(msg){ var t=msg;	// get t=msg to print
-		if(t===undefined){
-			t=this.tob;
-			this.uob+=this.uob?'\r\n':'', this.uob+=t;	// 20141209 sam
-			this.lastTob=t, this.tob='';	// if no msg, get t=tob and clear tob
-		}
+	var cr=this.cr=function(msg){	// get t=msg to print
+		var t=this.tob||'';
+		this.tob='';
+		if(msg) t+=msg;
+		else this.lastTob=t;
+		this.uob+=(this.uob?'\n':'')+t;	// 20141209 sam
 		console.log(t);								// print t (fixed)
 	};
 	var intToString=function(t){
@@ -260,16 +257,16 @@ function JeForthVM() {
 		this.tob+=a;									// append t to terminal output buffer
     };
     function showErr(msg){var m=msg;
-		if(this.err) m='<'+this.err+'>'+m+'</'+this.err+'>'; cr(m);
+		if(this.err) m='<'+this.err+'>'+m+'</'+this.err+'>'; cr.apply(this,[m]);
     }
     function showTst(msg){var m=msg;
-		if(this.tst) m='<'+this.tst+'>'+m+'</'+this.tst+'>'; cr(m);
+		if(this.tst) m='<'+this.tst+'>'+m+'</'+this.tst+'>'; cr.apply(this,[m]);
     }
     function showOk (msg){var m=msg;
-		if(this.ok ) m='<'+this.ok +'>'+m+'</'+this.ok +'>'; cr(m);
+		if(this.ok ) m='<'+this.ok +'>'+m+'</'+this.ok +'>'; cr.apply(this,[m]);
     }
     function showInp(msg){var m=msg;
-		if(this.inp) m='<'+this.inp+'>'+m+'</'+this.inp+'>'; cr(m);
+		if(this.inp) m='<'+this.inp+'>'+m+'</'+this.inp+'>'; cr.apply(this,[m]);
     }
 	function panic(msg){	// clear tob, show error msg, and abort
 		showErr(msg),error=msg,this.compiling=0; }
@@ -289,7 +286,7 @@ function JeForthVM() {
     }
     function compile(v) {	// compile v to code area									//	v2
 		var c= v===undefined ? this.cArea[this.ip++] : v;									//	v2
-	//	cr('compile '+JSON.stringify(c));			// for tracing only					//	v2
+	//	cr.apply(this,['compile '+JSON.stringify(c)]);			// for tracing only					//	v2
 		this.cArea.push(c);																//	v2
     }																					//	v2
     function compileCode(name,v) {	// compile named word to code area					//	v2
@@ -301,35 +298,35 @@ function JeForthVM() {
     function resumeCall() {	// resume inner loop interpreting of compiled code			//	v3
 		while(this.ip && !this.waiting){													//	v3
 			var w=this.cArea[this.ip];														//	v3
-		//	cr(this.ip+': '+w.name+' '+this.dStack);										//	v3
+		//	cr.apply(this,[this.ip+': '+w.name+' '+this.dStack]);										//	v3
 			this.ip++, execute.apply(this,[w]);														//	v3
 		}																				//	v3
-	//	if(this.ip) cr('wait at '+this.ip);													//	v3
+	//	if(this.ip) cr.apply(this,['wait at '+this.ip]);													//	v3
     }																					//	v3
     function call(addr) {	// interpret compiled code at addr of cArea					//	v2
-	//	cr(this.ip+' --> rStack '+this.rStack.length+': '+this.rStack.join());				//	v2
+	//	cr.apply(this,[this.ip+' --> rStack '+this.rStack.length+': '+this.rStack.join()]);				//	v2
 		this.rStack.push(this.ip), this.ip=addr;												//	v2
 		resumeCall.call(this);																	//	v3
     }																					//	v2
     function exit() {	// return from colon definition									//	v2
 		this.ip=this.rStack.pop();// pop ip from return stack								//	v2
-	//	cr(this.ip+' <-- rStack '+this.rStack.length+': '+this.rStack.join());				//	v2
+	//	cr.apply(this,[this.ip+' <-- rStack '+this.rStack.length+': '+this.rStack.join()]);				//	v2
     }																					//	v2
     function execute(w){            // execute or compile a word
 		var immediate=w.immediate, compiling=immediate?0:this.compiling;					//	v2
 	//	var s=(compiling?'compile':'execute')+' word ';	// for tracing only				//	v2
 		if(typeof w==='object'){
 			if(compiling){																//	v2
-			//	cr('compile '+w.name);         // for tracing only          			//	v2
+			//	cr.apply(this,['compile '+w.name]);         // for tracing only          			//	v2
 				compile.apply(this,[w]);																//	v2
 			} else {																	//	v2
 				var x=w.xt, t=typeof x;
 			//	s+=w.id+':\t'+w.name;					// for tracing only
 				if(t==="function"){
-				//	cr(s+' primitive');					// for tracing only
+				//	cr.apply(this,[s+' primitive']);					// for tracing only
 					x.call(this);				// execute function x directly
 				} else if(t==="number"){												//	v2
-				//	cr(s+' colon at '+x);				// for tracing only				//	v2
+				//	cr.apply(this,[s+' colon at '+x]);				// for tracing only				//	v2
 					call.apply(this,[x]);
 				//	call(x);			// execute colon definition at x				//	v2
 				} else {
@@ -374,13 +371,14 @@ function JeForthVM() {
 			if(n.toString(this.base)===tkn) return n; // any based integer numbe
 		}
     }																					//	v1
-	function resumeExec(){		// resume outer source code interpreting loop			//	v3
-        this.waiting=0;                                                                   //  v3
+	function resumeExec(step,resumeDone){		// resume outer source code interpreting loop			//	v3
+        this.onDone=resumeDone;
+        this.waiting=this.steping||step;                                                                   //  v3
         if(this.ip){																		//	v3
-        //  cr('resumeCall at ',this.ip);
+        //  cr.apply(this,['resumeCall at ',this.ip]);
             resumeCall.call(this);		// resume inner compiled code interpreting				//	v3
         }																				//	v3
-    //  cr('resume times',++this.rTimes);	// for tracing only                 			//	v3
+    //  cr.apply(this,['resume times',++this.rTimes]);	// for tracing only                 			//	v3
     	var tkn,n;
         do{	this.token=tkn=nextToken.call(this);	// get a token
 			if (tkn) {					// break if no more
@@ -390,18 +388,18 @@ function JeForthVM() {
 					if(n===undefined)
 						n=extQuotedStr.apply(this,[tkn]);											//	v1
 					if(n===undefined)
-						n=this.extData(tkn);												//	v1
+						n=this.extData.apply(this,[tkn]);												//	v1
 					if(n===undefined){													//	v1
 						panic.apply(this,["? "+this.token+" undefined"]); return; // token undefined
 					}																	//	v1
 					if(this.compiling){													//	v2
-					//	cr('compile doLit '+n);
+					//	cr.apply(this,['compile doLit '+n]);
 						compileCode.apply(this,['doLit',n]);											//	v2
 	                }else																//	v2
 						dStack.push(n);													//	v1
 				}
 			}
-		//	cr('dStack ===> '+dStack.length+':\t['+dStack.join()+']');					//	v1
+		//	cr.apply(this,['dStack ===> '+dStack.length+':\t['+dStack.join()+']']);					//	v1
         } while(!this.waiting && this.nTib<this.tib.length);
 		if(!this.waiting && !this.compiling){
 			var ok=' ok';
@@ -409,22 +407,27 @@ function JeForthVM() {
 			cr.apply(this,[ok]);
 		//	console.log(this.out), this.out='';
 		}
+		if(resumeDone)
+			resumeDone();
+		var result=this.uob+this.tob;
+		this.uob=this.tob='';
+		return result;
     }
     var lastCmd='',tasks=[];
-    function exec(cmd){		// source code interpreting
+    function exec(cmd,step){		// source code interpreting
     	if(!cmd) return // 20141216 sam
     	if(cmd!==lastCmd)
 			lastCmd=cmd, this.cmds.push(cmd), this.iCmd=this.cmds.length;	// for tracing only
-		if(this.inp)this.showInp(cmd);
-		else cr('source input '+this.cmds.length+':\t'+cmd);			// for tracing only
+		if(this.inp)this.showInp.apply(this,[cmd]);
+		else cr.apply(this,['source input '+this.cmds.length+':\t'+cmd]);			// for tracing only
 		error=0, this.tib=cmd, this.nTib=0, this.tob=this.uob='';		// 20141209 sam
-		resumeExec.call(this), this.error=error;					// 20141209 sam	//	v3 
+		resumeExec.apply(this,[step]), this.error=error;					// 20141209 sam	//	v3 
         return this.uob+this.tob;				// return this.uob 	// 20141209 sam
 	}
 	function addWord(name,xt,immediate){	// 
 		var id=words.length, w={name:name,xt:xt,id:id}; words.push(w), nameWord[name]=w;
 		if(immediate)w.immediate=1;
-		cr('defined '+id+': '+name+(typeof xt==='function'? ' as primitive' : ''));
+		cr.apply(this,['defined '+id+': '+name+(typeof xt==='function'? ' as primitive' : '')]);
 	}
 	var endCode='end-code';
 	function code(){ // code <name> d( -- )	// low level definition as a new word
@@ -437,7 +440,7 @@ function JeForthVM() {
 		}
 		var txt='('+t.substr(0,i)+')';
 		var newXt=eval(txt);//eval(txt);
-		addWord(this.newName,newXt);
+		addWord.apply(this,[this.newName,newXt]);
 	}
 	function doLit(){ // doLit ( -- n ) //												//	v2
 		this.dStack.push(this.cArea[this.ip++]);												//	v2
@@ -473,30 +476,31 @@ function JeForthVM() {
 	this.exit =exit         ;
 	this.addWord=addWord    ;
 }
-if (typeof module!="undefined") module.exports=JeForthVM;
-//window.vm=new JeForthVM();
+if (typeof module!="undefined")
+	module.exports=JeForthVM;
+else
+	window.vm=new JeForthVM();
 //  vm is now creaded and ready to use.
 });
 require.register("_2048/jefvm.v3_ext.js", function(exports, require, module){
-module.exports=function(vm) {
-
+function ext(vm) {
 //////////////////////////////////////////////////////////////////////////////////////// tools
 vm.equal=function equal(tag,value,expected){ var t; // asure value is exactly equal to expected
   vm.tests++;
   if(value===expected)
-    vm.passed++, vm.showTst(tag+' ok');
+    vm.passed++, vm.showTst.apply(vm,[tag+' ok']);
   else{
     var tv=typeof value, te=typeof expected;
     t='??? '+tag+' value:'+value+' not equal to expected:'+expected
-    vm.showErr(t);
+    vm.showErr.apply(vm,[t]);
     if(tv==='string')
       t='val len '+value.length+': '+value.split('').map(function(c){
         return c.charCodeAt(0).toString(16);
-      }).join(' '), vm.showErr(t);
+      }).join(' '), vm.showErr.apply(vm,[t]);
     if(te==='string')
       t='exp len '+expected.length+': '+expected.split('').map(function(c){
         return c.charCodeAt(0).toString(16);
-      }).join(' '), vm.showErr(t);
+      }).join(' '), vm.showErr.apply(vm,[t]);
   }
 }
 vm.trm=function trm(x){ // ignore all space, \t, or \n in string x
@@ -522,18 +526,18 @@ vm.showWords=function(){
 		np+' primitives '+
 		nc+' colons '+
 		ni+' ignores');
-	vm.type('primitives:');
+	vm.type.apply(vm,['primitives:']);
 	primitives.forEach(function(w){
-		if(vm.tob.length+w.length+1>80)vm.cr();
-		vm.type(' '+w);
+		if(vm.tob.length+w.length+1>80)vm.cr.apply(vm,[]);
+		vm.type.apply(vm,[' '+w]);
 	});
-	if(vm.tob)vm.cr();
-	vm.type('colons:');
+	if(vm.tob)vm.cr.apply(vm,[]);
+	vm.type.apply(vm,['colons:']);
 	colons.forEach(function(w){
-		if(vm.tob.length+w.length+1>80)vm.cr();
-		vm.type(' '+w);
+		if(vm.tob.length+w.length+1>80)vm.cr.apply(vm,[]);
+		vm.type.apply(vm,[' '+w]);
 	});
-	if(vm.tob)vm.cr();
+	if(vm.tob)vm.cr.apply(vm,[]);
 };
 vm.seeColon=function seeColon(addr){
   var ip=addr,prevName='',codeLimit=0;
@@ -550,7 +554,7 @@ vm.seeColon=function seeColon(addr){
       }
       s+=w;
     }
-    vm.cr(s);
+    vm.cr.apply(vm,[s]);
     prevName=n;
   } while((codeLimit && ip<codeLimit) || n!=='exit');
 };
@@ -559,118 +563,118 @@ vm.seeWord=function seeWord(w){
 	if(typeof o==='object'){
       var n=o.name, x=o.xt, t=typeof x, i=o.immediate?'immediate':'';
 		if(t==='function'){
-			vm.cr(n+' primitive '+i),vm.cr(x.toString().replace(/</g,'&lt;'));
+			vm.cr.apply(vm,[n+' primitive '+i]),vm.cr.apply(vm,[x.toString().replace(/</g,'&lt;')]);
 		} else if(t==='number' && x%1===0){
-			vm.cr(n+' colon '+i),vm.seeColon(x);
+			vm.cr.apply(vm,[n+' colon '+i]),vm.seeColon.apply(vm,[x]);
 		}else{
-			vm.cr(n+' xt='+x+' ?????');
+			vm.cr.apply(vm,[n+' xt='+x+' ?????']);
 		}
 	}else{
-		vm.cr(w+' ?????');
+		vm.cr.apply(vm,[w+' ?????']);
 	}
 };
 vm.seeArray=function seeArray(arr){
 	var old=vm.cArea; addr=old.length;
 	vm.cArea=vm.cArea.concat(arr);
-	vm.seeColon(addr);
+	vm.seeColon.apply(vm,[addr]);
 	vm.cArea=old;
 };
 vm.see=function see(x){
-	var o=x||vm.nextToken();
+	var o=x||vm.nextToken.apply(vm,[]);
 	var t=typeof o;
 	if(t==='number' && o%1===0){
-		vm.seeColon(o);
+		vm.seeColon.apply(vm,[o]);
 	} else if(t==='object'){
-		vm.seeWord(o);
+		vm.seeWord.apply(vm,[o]);
 	} else if(t==='string'){
-		vm.seeWord(vm.nameWord[o]);
+		vm.seeWord.apply(vm,[vm.nameWord[o]]);
 	} else {
-		vm.cr(o+' ?????');
+		vm.cr.apply(vm,[o+' ?????']);
 	}
 };
 //////////////////////////////////////////////////////////////////////////////////////// tools
-vm.addWord('code' ,vm.code );
-vm.addWord('doLit',vm.doLit);																//	v2
-vm.addWord('exit' ,vm.exit );																//	v2
-vm.addWord('words',vm.showWords);
-vm.addWord('see'  ,vm.see);
-vm.addWord('type' ,vm.type);
-vm.addWord('cr'   ,vm.cr);
+vm.addWord.apply(vm,['code' ,vm.code]);
+vm.addWord.apply(vm,['doLit',vm.doLit]);																//	v2
+vm.addWord.apply(vm,['exit' ,vm.exit ]);																//	v2
+vm.addWord.apply(vm,['words',vm.showWords]);
+vm.addWord.apply(vm,['see'  ,vm.see]);
+vm.addWord.apply(vm,['type' ,vm.type]);
+vm.addWord.apply(vm,['cr'   ,vm.cr]);
 //////////////////////////////////////////////////////////////////////////////////////////// v0
-vm.addWord('r1',function(){LED3.write(1);});
-vm.addWord('r0',function(){LED3.write(0);});
-vm.addWord('g1',function(){LED2.write(1);});
-vm.addWord('y1',function(){LED1.write(1);});
-vm.addWord('b1',function(){LED4.write(1);});
-vm.addWord('g0',function(){LED2.write(0);});
-vm.addWord('y0',function(){LED1.write(0);});
-vm.addWord('b0',function(){LED4.write(0);});
+vm.addWord.apply(vm,['r1',function(){LED3.write(1);}]);
+vm.addWord.apply(vm,['r0',function(){LED3.write(0);}]);
+vm.addWord.apply(vm,['g1',function(){LED2.write(1);}]);
+vm.addWord.apply(vm,['y1',function(){LED1.write(1);}]);
+vm.addWord.apply(vm,['b1',function(){LED4.write(1);}]);
+vm.addWord.apply(vm,['g0',function(){LED2.write(0);}]);
+vm.addWord.apply(vm,['y0',function(){LED1.write(0);}]);
+vm.addWord.apply(vm,['b0',function(){LED4.write(0);}]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
-vm.addWord('.',function(){vm.type.call(this),vm.type.apply(this,[" "]);});
-vm.addWord('+',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()+b);});
-vm.addWord('-',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()-b);});
-vm.addWord('*',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()*b);});
-vm.addWord('/',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()/b);});
-vm.addWord( '1+' ,function(){var s=vm.dStack; s[s.length-1]++;});
-vm.addWord( '1-' ,function(){var s=vm.dStack; s[s.length-1]--;});
-vm.addWord( '2+' ,function(){var s=vm.dStack; s[s.length-1]+=2;});
-vm.addWord( '2-' ,function(){var s=vm.dStack; s[s.length-1]-=2;});
-vm.addWord( '2*' ,function(){var s=vm.dStack; s[s.length-1]*=2;});
-vm.addWord( '2/' ,function(){var s=vm.dStack; s[s.length-1]/=2;});
-vm.addWord( '2%' ,function(){var s=vm.dStack; s[s.length-1]%=2;});
-vm.addWord( 'mod',function(){var s=vm.dStack, d=s.pop(); s[s.length-1]%=d;});
-vm.addWord('/mod',function(){
-	var s=vm.dStack, t=s.length-1,n=t-1,sn=s[n],st=s[t],r=s[n]=sn%st; s[t]=(sn-r)/st;});
-vm.addWord('and',function(){vm.dStack.push(vm.dStack.pop()&vm.dStack.pop());});
-vm.addWord('or' ,function(){vm.dStack.push(vm.dStack.pop()|vm.dStack.pop());});
-vm.addWord('xor',function(){vm.dStack.push(vm.dStack.pop()^vm.dStack.pop());});
-vm.addWord('hex'    ,function(){vm.base=16;});
-vm.addWord('decimal',function(){vm.base=10;});
-vm.addWord('binary' ,function(){vm.base= 2;});
-vm.addWord('.r',function(){
-	var m=vm.dStack.pop(),n=""+vm.dStack.pop();vm.type("         ".substr(0,m-n.length)+n);});
+vm.addWord.apply(vm,['.',function(){vm.type.call(this),vm.type.apply(this,[" "]);}]);
+vm.addWord.apply(vm,['+',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()+b);}]);
+vm.addWord.apply(vm,['-',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()-b);}]);
+vm.addWord.apply(vm,['*',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()*b);}]);
+vm.addWord.apply(vm,['/',function(){var b=vm.dStack.pop();vm.dStack.push(vm.dStack.pop()/b);}]);
+vm.addWord.apply(vm,[ '1+' ,function(){var s=vm.dStack; s[s.length-1]++;}]);
+vm.addWord.apply(vm,[ '1-' ,function(){var s=vm.dStack; s[s.length-1]--;}]);
+vm.addWord.apply(vm,[ '2+' ,function(){var s=vm.dStack; s[s.length-1]+=2;}]);
+vm.addWord.apply(vm,[ '2-' ,function(){var s=vm.dStack; s[s.length-1]-=2;}]);
+vm.addWord.apply(vm,[ '2*' ,function(){var s=vm.dStack; s[s.length-1]*=2;}]);
+vm.addWord.apply(vm,[ '2/' ,function(){var s=vm.dStack; s[s.length-1]/=2;}]);
+vm.addWord.apply(vm,[ '2%' ,function(){var s=vm.dStack; s[s.length-1]%=2;}]);
+vm.addWord.apply(vm,[ 'mod',function(){var s=vm.dStack, d=s.pop(); s[s.length-1]%=d;}]);
+vm.addWord.apply(vm,['/mod',function(){
+	var s=vm.dStack, t=s.length-1,n=t-1,sn=s[n],st=s[t],r=s[n]=sn%st; s[t]=(sn-r)/st;}]);
+vm.addWord.apply(vm,['and',function(){vm.dStack.push(vm.dStack.pop()&vm.dStack.pop());}]);
+vm.addWord.apply(vm,['or' ,function(){vm.dStack.push(vm.dStack.pop()|vm.dStack.pop());}]);
+vm.addWord.apply(vm,['xor',function(){vm.dStack.push(vm.dStack.pop()^vm.dStack.pop());}]);
+vm.addWord.apply(vm,['hex'    ,function(){vm.base=16;}]);
+vm.addWord.apply(vm,['decimal',function(){vm.base=10;}]);
+vm.addWord.apply(vm,['binary' ,function(){vm.base= 2;}]);
+vm.addWord.apply(vm,['.r',function(){
+	var m=vm.dStack.pop(),n=""+vm.dStack.pop();vm.type.apply(vm,["         ".substr(0,m-n.length)+n]);}]);
 //////////////////////////////////////////////////////////////////////////////////////////// v2
-vm.addWord(':',function(){
-	vm.newName=vm.nextToken(),vm.newXt=vm.cArea.length,vm.compiling=1;});
-vm.addWord('immediate',function(){vm.words[vm.words.length-1].immediate=1;});
-vm.addWord(';',function(){
-	vm.compileCode("exit"),vm.compiling=0;vm.addWord(vm.newName,vm.newXt);},'immediate');
-vm.addWord('r@',function(){vm.dStack.push(vm.rStack[vm.rStack.length-1]);});
-vm.addWord('i' ,function(){vm.dStack.push(vm.rStack[vm.rStack.length-1].i);});
-vm.addWord('>r',function(){vm.rStack.push(vm.dStack.pop());});
-vm.addWord('for',function(){
+vm.addWord.apply(vm,[':',function(){
+	vm.newName=vm.nextToken.apply(vm,[]),vm.newXt=vm.cArea.length,vm.compiling=1;}]);
+vm.addWord.apply(vm,['immediate',function(){vm.words[vm.words.length-1].immediate=1;}]);
+vm.addWord.apply(vm,[';',function(){
+	vm.compileCode.apply(vm,["exit"]),vm.compiling=0;vm.addWord.apply(vm,[vm.newName,vm.newXt]);},'immediate']);
+vm.addWord.apply(vm,['r@',function(){vm.dStack.push(vm.rStack[vm.rStack.length-1]);}]);
+vm.addWord.apply(vm,['i' ,function(){vm.dStack.push(vm.rStack[vm.rStack.length-1].i);}]);
+vm.addWord.apply(vm,['>r',function(){vm.rStack.push(vm.dStack.pop());}]);
+vm.addWord.apply(vm,['for',function(){
 	if(vm.compiling){
-		vm.compileCode(">r");vm.dStack.push({name:"for",at:vm.cArea.length}); return;
+		vm.compileCode.apply(vm,[">r"]);vm.dStack.push({name:"for",at:vm.cArea.length}); return;
 	}
 	var nTib=vm.nTib,i=vm.dStack.pop();vm.rStack.push({name:"for",nTib:nTib,i:i});
-},'immediate');
-vm.addWord('doNext',function(){
+},'immediate']);
+vm.addWord.apply(vm,['doNext',function(){
 	var i=vm.rStack.pop();
 	if(i){vm.rStack.push(i-1),vm.ip+=vm.cArea[vm.ip];}
-	else vm.ip++;});
-vm.addWord('next',function(){ var o; // why this was broken ??????????????????
+	else vm.ip++;}]);
+vm.addWord.apply(vm,['next',function(){ var o; // why this was broken ??????????????????
   if(vm.compiling) o=vm.dStack.pop();
   else o=vm.rStack[vm.rStack.length-1];
   var t=typeof o;
   if(t!=="object" || o.name!=="for"){
-    vm.panic("no for to match next"); return;
+    vm.panic.apply(vm,["no for to match next"]); return;
   }
   if(vm.compiling){
-    vm.compileCode("doNext",o.at-vm.cArea.length-1); return;
+    vm.compileCode.apply(vm,["doNext",o.at-vm.cArea.length-1]); return;
   }
   if(--o.i>=0)vm.nTib=o.nTib;
   else        vm.rStack.pop();
-},'immediate');
-vm.addWord('drop',function(){vm.dStack.pop();});
-vm.addWord('dup',function(){vm.dStack.push(vm.dStack[vm.dStack.length-1]);});
-vm.addWord('over',function(){vm.dStack.push(vm.dStack[vm.dStack.length-2]);});
-vm.addWord('emit',function(){vm.type(String.fromCharCode(vm.dStack.pop()));});
-vm.addWord('branch',function(){vm.ip+=vm.cArea[vm.ip];});
-vm.addWord('zBranch',function(){
-	if(vm.dStack.pop())vm.ip++; else vm.ip+=vm.cArea[vm.ip];});
-vm.addWord('if',function(){
+},'immediate']);
+vm.addWord.apply(vm,['drop',function(){vm.dStack.pop();}]);
+vm.addWord.apply(vm,['dup',function(){vm.dStack.push(vm.dStack[vm.dStack.length-1]);}]);
+vm.addWord.apply(vm,['over',function(){vm.dStack.push(vm.dStack[vm.dStack.length-2]);}]);
+vm.addWord.apply(vm,['emit',function(){vm.type.apply(vm,[String.fromCharCode(vm.dStack.pop())]);}]);
+vm.addWord.apply(vm,['branch',function(){vm.ip+=vm.cArea[vm.ip];}]);
+vm.addWord.apply(vm,['zBranch',function(){
+	if(vm.dStack.pop())vm.ip++; else vm.ip+=vm.cArea[vm.ip];}]);
+vm.addWord.apply(vm,['if',function(){
 	if(vm.compiling){
-		vm.compileCode("zBranch",0);
+		vm.compileCode.apply(vm,["zBranch",0]);
 		vm.dStack.push({name:"if",at:vm.cArea.length-1});return;
 	}
 	if(vm.dStack.pop())return; // 20141215 sam fixed
@@ -684,188 +688,194 @@ vm.addWord('if',function(){
 	} else if(t>=0)
 		vm.nTib+=t+4; // zbranch to then
 	else
-		vm.panic("no else or then to match if");
-},'immediate');
-vm.addWord('else',function () {var t;
+		vm.panic.apply(vm,["no else or then to match if"]);
+},'immediate']);
+vm.addWord.apply(vm,['else',function () {var t;
   if(vm.compiling){
    var o=vm.dStack.pop();t=typeof o;
    if(t!=="object" || o.name!="if"){
-        vm.panic("there is no if to match else");return;
+        vm.panic.apply(vm,["there is no if to match else"]);return;
    }
-   var i=o.at; vm.compileCode("branch",0);
+   var i=o.at; vm.compileCode.apply(vm,["branch",0]);
    vm.dStack.push({name:"else",at:vm.cArea.length-1});
    vm.cArea[i]=vm.cArea.length-i;return;
   }
   t=vm.tib.substr(vm.nTib).indexOf("then");
   if(t>=0) vm.nTib+=t+4; // branch to then
-  else vm.panic("there is no then to match else");
-},'immediate');
-vm.addWord('then',function () {
+  else vm.panic.apply(vm,["there is no then to match else"]);
+},'immediate']);
+vm.addWord.apply(vm,['then',function () {
   if(!vm.compiling) return;
   var o=vm.dStack.pop(),t=typeof o, n=o.name;
   if(t!=="object" || (n!="if" && n!="else" && n!="aft")){
-        vm.panic("no if, else, aft to match then");return;
+        vm.panic.apply(vm,["no if, else, aft to match then"]);return;
   }
   var i=o.at; vm.cArea[i]=vm.cArea.length-i;
-},'immediate');
-vm.addWord('aft',function () {var t;
+},'immediate']);
+vm.addWord.apply(vm,['aft',function () {var t;
   if(vm.compiling){
    var s=vm.dStack,o=s[s.length-1];t=typeof o;
    if(t!=="object" || o.name!=="for"){
-        vm.panic("no for to match aft");return;
+        vm.panic.apply(vm,["no for to match aft"]);return;
    }
    var i=o.at;
-   vm.compileCode("zBranch",0);
+   vm.compileCode.apply(vm,["zBranch",0]);
    vm.dStack.push({name:"aft",at:vm.cArea.length-1});
    return;
   }
   t=vm.tib.substr(vm.nTib).indexOf("then");
   if(t>=0) vm.nTib+=t+4; // branch to then
-  else vm.panic("there is no then to match aft");
-},'immediate');
-vm.addWord('?dup',function () {var s=vm.dStack, d=s[s.length-1]; if(d)s.push(d);});
-vm.addWord('0=',function () {var s=vm.dStack,m=s.length-1; s[m]=!s[m];});
-vm.addWord('begin',function () {
+  else vm.panic.apply(vm,["there is no then to match aft"]);
+},'immediate']);
+vm.addWord.apply(vm,['?dup',function () {var s=vm.dStack, d=s[s.length-1]; if(d)s.push(d);}]);
+vm.addWord.apply(vm,['0=',function () {var s=vm.dStack,m=s.length-1; s[m]=!s[m];}]);
+vm.addWord.apply(vm,['begin',function () {
   if(vm.compiling){
         vm.dStack.push({name:"begin",at:vm.cArea.length-1});
         return;
   }
   vm.rStack.push({name:"begin",nTib:vm.nTib});
-},'immediate');
-vm.addWord('again',function () {    var o;
+},'immediate']);
+vm.addWord.apply(vm,['again',function () {    var o;
   if(vm.compiling)
         o=vm.dStack.pop();
   else
         o=vm.rStack[vm.rStack.length-1];
   var    t=typeof o;
   if(t!=="object" || o.name!=="begin"){
-        vm.panic("no begin to match again");
+        vm.panic.apply(vm,["no begin to match again"]);
         return;
   }
   if(vm.compiling){
         var i=o.at;
-        vm.compileCode( "branch", i-vm.cArea.length);
+        vm.compileCode.apply(vm,[ "branch", i-vm.cArea.length]);
         return;
   }
   vm.nTib=o.nTib;
-},'immediate');
-vm.addWord('until',function () {    var o;
+},'immediate']);
+vm.addWord.apply(vm,['until',function () {    var o;
   if(vm.compiling)
         o=vm.dStack.pop();
   else
         o=vm.rStack[vm.rStack.length-1];
   var    t=typeof o;
   if(t!=="object" || o.name!=="begin"){
-        vm.panic("no begin to match until");
+        vm.panic.apply(vm,["no begin to match until"]);
         return;
   }
   if(vm.compiling){
         var i=o.at;
-        vm.compileCode( "zBranch", i-vm.cArea.length);
+        vm.compileCode.apply(vm,[ "zBranch", i-vm.cArea.length]);
         return;
   }
   if(vm.dStack.pop()) vm.rStack.pop();
   else vm.nTib=o.nTib;
-},'immediate');
-vm.addWord('while',function () {    var s,o,t;
+},'immediate']);
+vm.addWord.apply(vm,['while',function () {    var s,o,t;
   s=vm.dStack,o=s[s.length-1],t=typeof o;
   if(t!=="object" || o.name!=="begin"){
-        vm.panic("no begin to match while");return;
+        vm.panic.apply(vm,["no begin to match while"]);return;
   }
-  var i=o.at; vm.compileCode("zBranch",0);
+  var i=o.at; vm.compileCode.apply(vm,["zBranch",0]);
   vm.dStack.push({name:"while",at:vm.cArea.length-1});
-},'immediate');
-vm.addWord('repeat',function () {
+},'immediate']);
+vm.addWord.apply(vm,['repeat',function () {
   var o=vm.dStack.pop(),t=typeof o;
   if(t!=="object" || o.name!=="while"){
-        vm.panic("no while to match repeat");return;
+        vm.panic.apply(vm,["no while to match repeat"]);return;
   }
   var i=o.at; o=vm.dStack.pop(),t=typeof o;
   if(t!=="object" || o.name!=="begin"){
-        vm.panic("no begin to match repeat");return;
+        vm.panic.apply(vm,["no begin to match repeat"]);return;
   }
-  vm.compileCode("branch",o.at-vm.cArea.length);
+  vm.compileCode.apply(vm,["branch",o.at-vm.cArea.length]);
   vm.cArea[i]=vm.cArea.length-i;
-},'immediate');
+},'immediate']);
 //////////////////////////////////////////////////////////////////////////////////////////// v3
 vm.msTime=[];                                   //  v2;
-vm.addWord('ms',function (n) {
+vm.addWord.apply(vm,['ms',function (n) {
   var m= n===undefined ? vm.dStack.pop() : n;
-  var t={tib:vm.tib,nTib:vm.nTib,tob:vm.tob,uob:vm.uob,dStack:vm.dStack};
-  vm.waiting=1; var tt=setTimeout(function(){
-    vm.msTime.splice(vm.msTime.indexOf(tt),1);
+  var t={tib:vm.tib,nTib:vm.nTib,tob:vm.tob,uob:vm.uob,dStack:vm.dStack,wakeup:new Date()+m};
+  vm.waiting=1; t.timeout=setTimeout(function(){
+    var i=vm.msTime.map(function(tsk){
+      return tsk.timeout
+    }).indexOf(t.timeout);
+    vm.msTime.splice(i,1);
     vm.tib=t.tib,vm.nTib=t.nTib,vm.tob=t.tob,vm.uob=t.uob,vm.dStack=t.dStack;
-    vm.resumeExec.call(vm);
+    vm.resumeExec.apply(vm,[vm.waiting===1?0:vm.waiting]);
   },m);
-  vm.msTime.push(tt);
-});
-vm.addWord('append',function(){var d,t,o,a,v;
-  d=vm.dStack.pop(), t=vm.nextToken(), vm[t]=o=d.append(t), a=vm.nextToken();
+  vm.msTime.push(t);
+}]);
+vm.addWord.apply(vm,['append',function(){var d,t,o,a,v;
+  d=vm.dStack.pop(), t=vm.nextToken.apply(vm,[]), vm[t]=o=d.append(t), a=vm.nextToken.apply(vm,[]);
   while(a){
-	t=vm.nextToken();
+	t=vm.nextToken.apply(vm,[]);
     if(a==='text')o.text(' '+t);
     else o.attr(a,t);
 	if(vm.c==='\n')break;
-	a=vm.nextToken();
+	a=vm.nextToken.apply(vm,[]);
   }
-});
-
-
+}]);
 };
+if(typeof module!='undefined')
+	module.exports=ext;
+else
+	ext(vm);
+
 });
 require.register("_2048/jefvm.v3_tst.js", function(exports, require, module){
-module.exports=function(vm) {
+function tst(vm) {
 //////////////////////
 // jefvm.v2_tst.js //
 //////////////////////
 vm.tests=0, vm.passed=0;
 //////////////////////////////////////////////////////////////////////////////////////////// v0
-vm.equal('test 1',vm.trm(vm.nameWord['r1'].xt.toString()),"function(){LED3.write(1);}");
+vm.equal.apply(vm,['test 1',vm.trm.apply(vm,[vm.nameWord['r1'].xt.toString()]),"function(){LED3.write(1);}"]);
 //////////////////////////////////////////////////////////////////////////////////////////// v0
-vm.equal('test 2',vm.trm(vm.nameWord['r0'].xt.toString()),"function(){LED3.write(0);}");
+vm.equal.apply(vm,['test 2',vm.trm.apply(vm,[vm.nameWord['r0'].xt.toString()]),"function(){LED3.write(0);}"]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['123 . 4.56 . -10 . $41 . cr']);
-vm.equal('test 3',vm.lastTob,"123 4.56 -10 65 ");
+vm.equal.apply(vm,['test 3',vm.lastTob,"123 4.56 -10 65 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['"abc" . "def 123" . cr']);
-vm.equal('test 4',vm.lastTob,"abc def 123 ");
+vm.equal.apply(vm,['test 4',vm.lastTob,"abc def 123 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,["'ghi' . cr"]);
-vm.equal('test 5',vm.lastTob,"ghi ");
+vm.equal.apply(vm,['test 5',vm.lastTob,"ghi "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['5 type 2 . 5 . cr']);
-vm.equal('test 6',vm.lastTob,"52 5 ");
+vm.equal.apply(vm,['test 6',vm.lastTob,"52 5 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['"abc def" '+"'ghi' + . 2.23 0.23 - 3 * 2 / . cr"]);
-vm.equal('test 7',vm.lastTob,"abc defghi 3 ");
+vm.equal.apply(vm,['test 7',vm.lastTob,"abc defghi 3 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['128 hex . cr decimal']);
-vm.equal('test 8',vm.lastTob,"80 ");
+vm.equal.apply(vm,['test 8',vm.lastTob,"80 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['hex 100 decimal . cr']);
-vm.equal('test 9',vm.lastTob,"256 ");
+vm.equal.apply(vm,['test 9',vm.lastTob,"256 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['11 binary . decimal cr']);
-vm.equal('test 10',vm.lastTob,"1011 ");
+vm.equal.apply(vm,['test 10',vm.lastTob,"1011 "]);
 //////////////////////////////////////////////////////////////////////////////////////////// v1
 vm.exec.apply(vm,['5 3 .r 10 3 .r 15 3 .r cr']);
-vm.equal('test 11',vm.lastTob,"  5 10 15");
+vm.equal.apply(vm,['test 11',vm.lastTob,"  5 10 15"]);
 //////////////////////////////////////////////////////////////////////////////////////////// v2
 vm.cArea=[ 0,vm.nameWord['doLit'],3,vm.nameWord['.r'],vm.nameWord['exit'] ],vm.addWord('t',1);
 vm.exec.apply(vm,['5 t 10 t 15 t cr']);
-vm.equal('test 12',vm.lastTob,"  5 10 15");
+vm.equal.apply(vm,['test 12',vm.lastTob,"  5 10 15"]);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': x 3 .r ; 5 x 10 x 15 x cr']);
-vm.equal('test 13',vm.lastTob,"  5 10 15");
+vm.equal.apply(vm,['test 13',vm.lastTob,"  5 10 15"]);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': z 9 for r@ . next ; z cr']);
-vm.equal('test 14',vm.lastTob,'9 8 7 6 5 4 3 2 1 0 ');
+vm.equal.apply(vm,['test 14',vm.lastTob,'9 8 7 6 5 4 3 2 1 0 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': t1 8 for dup 9 r@ - * 3 .r next drop ; 3 t1 cr']);
-vm.equal('test 15',vm.lastTob,'  3  6  9 12 15 18 21 24 27');
+vm.equal.apply(vm,['test 15',vm.lastTob,'  3  6  9 12 15 18 21 24 27']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': t2 8 for 9 r@ - t1 cr next ; t2']);
-vm.equal('test 16',vm.lastTob,'  9 18 27 36 45 54 63 72 81');
+vm.equal.apply(vm,['test 16',vm.lastTob,'  9 18 27 36 45 54 63 72 81']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 var addr=vm.cArea.length;
 var compiled=[
@@ -878,37 +888,37 @@ var compiled=[
 vm.cArea=vm.cArea.concat(compiled);
 vm.addWord.apply(vm,['t17',addr]);
 vm.exec.apply(vm,['0 t17 . 5 t17 . cr']);
-vm.equal('test 17',vm.lastTob,'0 1 ');
+vm.equal.apply(vm,['test 17',vm.lastTob,'0 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 addr=vm.cArea.length;
 vm.exec.apply(vm,[': t18 if 1 else 0 then ;']);
-vm.equal('test 18',JSON.stringify(vm.cArea.slice(addr)),JSON.stringify(compiled));
+vm.equal.apply(vm,['test 18',JSON.stringify(vm.cArea.slice(addr)),JSON.stringify(compiled)]);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,['0 t18 . 5 t18 . cr']);
-vm.equal('test 19',vm.lastTob,'0 1 ');
+vm.equal.apply(vm,['test 19',vm.lastTob,'0 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': t20 begin dup . 1- ?dup 0= if exit then again ; 9 t20 cr']);
-vm.equal('test 20',vm.lastTob,'9 8 7 6 5 4 3 2 1 ');
+vm.equal.apply(vm,['test 20',vm.lastTob,'9 8 7 6 5 4 3 2 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': t21 begin dup . 1- ?dup 0= until ; 9 t21 cr']);
-vm.equal('test 21',vm.lastTob,'9 8 7 6 5 4 3 2 1 ');
+vm.equal.apply(vm,['test 21',vm.lastTob,'9 8 7 6 5 4 3 2 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,[': t22 begin ?dup while dup . 1- repeat ; 9 t22 cr']);
-vm.equal('test 22',vm.lastTob,'9 8 7 6 5 4 3 2 1 ');
+vm.equal.apply(vm,['test 22',vm.lastTob,'9 8 7 6 5 4 3 2 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,['10 3 mod . cr']);
-vm.equal('test 23',vm.lastTob,'1 ');
+vm.equal.apply(vm,['test 23',vm.lastTob,'1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,['10 3 /mod . . cr']);
-vm.equal('test 24',vm.lastTob,'3 1 ');
+vm.equal.apply(vm,['test 24',vm.lastTob,'3 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,['3 begin dup . 1 - ?dup 0= until cr']);
-vm.equal('test 25',vm.lastTob,'3 2 1 ');
+vm.equal.apply(vm,['test 25',vm.lastTob,'3 2 1 ']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
 vm.exec.apply(vm,['8 for 9 i - 8\n  for dup 9 i - * 3 .r \n  next cr drop\nnext']);
-vm.equal('test 26',vm.lastTob,'  9 18 27 36 45 54 63 72 81');
+vm.equal.apply(vm,['test 26',vm.lastTob,'  9 18 27 36 45 54 63 72 81']);
 //////////////////////////////////////////////////////////////////////////////////////// v2
-vm.showTst('total tests '+vm.tests+' passed '+vm.passed);
+vm.showTst.apply(vm,['total tests '+vm.tests+' passed '+vm.passed]);
 ///////////////////////////////////////////////////////////////////////////////////////////
 vm.addWord.apply(vm,['stop',vm.stop]);
 vm.addWord.apply(vm,['go',vm.go]);
@@ -928,12 +938,13 @@ vm.addWord.apply(vm,['rect',function(){
 		return a+':'+s[a];
 	}).join(';'));
 }]);
-
 }
+if(typeof module!='undefined')
+	module.exports=tst;
+else
+	tst(vm);
 });
 require.register("_2048/_2048.js", function(exports, require, module){
-
-
 // new2048.js // http://labs.rampinteractive.co.uk/touchSwipe/demos/Basic_swipe.html
 var max=localStorage.getItem('max2048'); max=max?parseInt(max):0; // 讀取 高分 紀錄
 $("#max").text("最高" + max);
@@ -951,7 +962,7 @@ function noMore(){
 	$('#mainbox')[0].style.background='#fcc';
 }
 function isEnd() {
-	if (time<=0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
+	if (time<0||(locations.indexOf(0)<0 && isEndH() && isEndV())) {
 	// (逾時) 或者 (無 空格 且 無法 左右 橫向移動 也 無法 上下 縱向移動)
 		noMore();
 		return true
@@ -1100,12 +1111,19 @@ function paint() { // 更新畫面
 	isEnd();
 }
 var init=function(){
+	var t0,t1;
+	t0=new Date(), console.log('t0',t0);
+	setTimeout(
+		function(){
+			t1=new Date(), console.log('t1', t1, 'delta', t1.valueOf()-t0.valueOf())
+		},
+		1000
+	);
 	var JeForthVM=require("./jefvm.v3.js");
-	var vm=new JeForthVM();
+	window.vm=new JeForthVM();
 	require("./jefvm.v3_ext.js")(vm);
 	require("./jefvm.v3_tst.js")(vm);
-	window.vm=vm;
-	vm.extData=function (tkn){
+	vm.extData=vm.extData||function (tkn){
 		if( typeof vm[tkn]!=='undefined' )
 			return vm[tkn]; 						// vm attribute
 		if(tkn.match(/#([0-9a-f]{3}|[0-9a-f]{6})/))
@@ -1118,7 +1136,7 @@ var init=function(){
 			return v;								// d3 object
 		return eval(tkn);							// js defined
 	}
-	vm.Get=function (obj,att){ var lst;
+	vm.Get=vm.Get||function (obj,att){ var lst;
 		obj=obj||vm.dStack.pop(), att=att||vm.dStack.pop();
 		if(typeof(obj)==='object'&&obj.attr)
 			return obj.attr(att);
@@ -1144,7 +1162,6 @@ var init=function(){
 			}
 		}
 	}
-
 	vm.exec.apply(vm,[
 		'code get function(){ /* get ( obj <att> -- val ) */\n'+
 		' /* 例: vm.exec.apply(vm,["vm get words get name type"]) */\n'+
@@ -1189,7 +1206,7 @@ var init=function(){
 	vm.exec.apply(vm,['code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code']);
 }
 function halt(){
-	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t)});
+	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t.timeout)});
 }
 function go(){
 	halt();
@@ -1205,9 +1222,8 @@ function go(){
 	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
 }
-window._2048={halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
+window._2048={init:init,halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
 window.x=function(cmd){vm.exec.apply(vm,[cmd])} // 例: x("#f00 c2 set fill")
-init();
 
 module.exports=_2048;
 
