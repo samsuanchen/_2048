@@ -1176,32 +1176,36 @@ var init=function(){
 		' /* 例2: vm.exec.apply(vm,["\'background-color:yellow\' box1 set style"]) */\n'+
 		' obj=vm.dStack.pop(), att=vm.nextToken.call(vm), vm.Set(obj,att,vm.dStack.pop()); }end-code']);
 	vm.exec.apply(vm,[
+		'code Xmi function(){ /* Xmi ( -- xmin ) */\n'+
+		' vm.dStack.push(parseInt(c1.getAttribute("r")));}end-code\n'+
+		'code Xma function(){ /* Xma ( -- xmax ) */\n'+
+		' vm.dStack.push(parseInt(svg.getAttribute("width"))-parseInt(c1.getAttribute("r")));}end-code\n'+
 		'code xmi function(){ /* mi ( -- xmin ) */\n'+
-		' vm.dStack.push(parseInt(c1.getAttribute(\'r\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c2.getAttribute("r")));}end-code\n'+
 		'code xma function(){ /* ma ( -- xmax ) */\n'+
-		' vm.dStack.push(svg.clientWidth-parseInt(c1.getAttribute(\'r\')));}end-code\n'+
+		' vm.dStack.push(parseInt(svg.getAttribute("width"))-parseInt(c2.getAttribute("r")));}end-code\n'+
 		'code Cx@ function(){ /* Cx@ ( -- Cx ) */\n'+
-		' vm.dStack.push(parseInt(c1.getAttribute(\'cx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c1.getAttribute("cx")));}end-code\n'+
 		'code Dx@ function(){ /* Dx@ ( -- Dx ) */\n'+
-		' vm.dStack.push(parseInt(c1.getAttribute(\'dx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c1.getAttribute("dx")));}end-code\n'+
 		'code Cx! function(){ /* Cx! ( Cx -- ) */\n'+
-		' c1.setAttribute(\'cx\',vm.dStack.pop());}end-code\n'+
+		' c1.setAttribute("cx",vm.dStack.pop());}end-code\n'+
 		'code Cx+! function(){ /* Cx+! ( Dx -- ) */\n'+
-		' c1.setAttribute(\'cx\',parseInt(c1.getAttribute(\'cx\'))+vm.dStack.pop());}end-code\n'+
+		' c1.setAttribute("cx",parseInt(c1.getAttribute("cx"))+vm.dStack.pop());}end-code\n'+
 		'code Dx! function(){ /* Dx! ( Dx -- ) */\n'+
-		' c1.setAttribute(\'dx\',vm.dStack.pop());}end-code\n'+
+		' c1.setAttribute("dx",vm.dStack.pop());}end-code\n'+
 		'code cx@ function(){ /* cx@ ( -- cx ) */\n'+
-		' vm.dStack.push(parseInt(c2.getAttribute(\'cx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c2.getAttribute("cx")));}end-code\n'+
 		'code dx@ function(){ /* dx@ ( -- dx ) */\n'+
-		' vm.dStack.push(parseInt(c2.getAttribute(\'dx\')));}end-code\n'+
+		' vm.dStack.push(parseInt(c2.getAttribute("dx")));}end-code\n'+
 		'code cx! function(){ /* cx! ( cx -- ) */\n'+
-		' c2.setAttribute(\'cx\',vm.dStack.pop());}end-code\n'+
+		' c2.setAttribute("cx",vm.dStack.pop());}end-code\n'+
 		'code cx+! function(){ /* cx+! ( dx -- ) */\n'+
-		' c2.setAttribute(\'cx\',parseInt(c2.getAttribute(\'cx\'))+vm.dStack.pop());}end-code\n'+
+		' c2.setAttribute("cx",parseInt(c2.getAttribute("cx"))+vm.dStack.pop());}end-code\n'+
 		'code dx! function(){ /* dx! ( dx -- ) */\n'+
-		' /* 例1: vm.exec.apply(vm,["1 Dx! xma for 20 ms Dx@ Cx+! next"]) */\n'+
-		' /* 例2: vm.exec.apply(vm,["50 Cx! 1 Dx! begin xma for 20 ms Dx@ Cx+! next 0 Dx@ - Dx! again"]) */\n'+
-		' c2.setAttribute(\'dx\',vm.dStack.pop());}end-code']);
+		' /* 例1: vm.exec.apply(vm,["1 Dx! Xma for 20 ms Dx@ Cx+! next"]) */\n'+
+		' /* 例2: vm.exec.apply(vm,["50 Cx! 1 Dx! begin Xma for 20 ms Dx@ Cx+! next 0 Dx@ - Dx! again"]) */\n'+
+		' c2.setAttribute("dx",vm.dStack.pop());}end-code']);
 	vm.exec.apply(vm,['code > function(){dStack.push(dStack.pop()<dStack.pop())}end-code']);
 	vm.exec.apply(vm,['code < function(){dStack.push(dStack.pop()>dStack.pop())}end-code']);
 }
@@ -1219,7 +1223,7 @@ function go(){
 		$("#time").html("剩餘<br/>"+ time-- +"秒");
 		if(time<0) noMore();
 	},1000); // show time
-	vm.exec.apply(vm,["xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ xmi < Cx@ xma > or if 0 Dx@ - Dx! then again"])
+	vm.exec.apply(vm,["Xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ Xmi < Cx@ Xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
 }
 window._2048={init:init,halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};

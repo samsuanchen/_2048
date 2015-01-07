@@ -11,8 +11,8 @@ jsonp_handler({
   "jquery.js",
   "d3.js",
   "index.html",
-  "build.js",
-  "build.css",
+  "bundle.js",
+  "bundle.css",
   "ksana.js"
  ],
  "filesizes": [

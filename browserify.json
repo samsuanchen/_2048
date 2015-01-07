@@ -1,0 +1,23 @@
+{
+  "name": "_2048",
+  "repo": "https://github.com/samsuanchen/_2048.git",
+  "description": "hello world",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+  },
+  "development": {},
+  "paths": [
+  ],
+  "license": "MIT",
+  "main": "_2048.js",
+  "scripts": [
+    "jefvm.v3.js",
+    "jefvm.v3_ext.js",
+    "jefvm.v3_tst.js",
+    "_2048.js"
+  ],
+  "styles": [
+    "_2048.css"
+  ]
+}
