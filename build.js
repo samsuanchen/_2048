@@ -1211,19 +1211,34 @@ var init=function(){
 }
 function halt(){
 	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t.timeout)});
+	if(btnHalt.innerText==='停'){
+		btnHalt.innerText='走';
+	}else{
+		btnHalt.innerText='停';
+		vm.exec("begin 20 ms Dx@ Cx+! Cx@ Xmi < Cx@ Xma > or if 0 Dx@ - Dx! then again");
+		vm.exec("begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again")
+		tGo=setInterval(function (){
+			$("#time").html("剩餘<br/>"+ time-- +"秒");
+			if(time<0) noMore();
+		},1000);;
+	}
 }
 function go(){
-	halt();
+	clearInterval(tGo), vm.msTime.forEach(function(t){clearTimeout(t.timeout)});
+	if(btnHalt.innerText==='走')
+		btnHalt.innerText='停';
 	if(!nomore) btnGo.innerText='重新 esc', hint.innerText='手 滑動 或 按鍵';
 	locations=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // 每格起始分數 0
 	$('#score')[0].style.background='white';
 	$('#mainbox')[0].style.background='white';
 	nomore=score=0, time=300, newNumber(), newNumber(), paint();
-	tGo=setInterval(function (){
-		$("#time").html("剩餘<br/>"+ time-- +"秒");
-		if(time<0) noMore();
-	},1000); // show time
-	vm.exec.apply(vm,["Xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ Xmi < Cx@ Xma > or if 0 Dx@ - Dx! then again"])
+/*	if(time.innerText.match(/\d+/)[0]>='0'){
+		tGo=setInterval(function (){
+			$("#time").html("剩餘<br/>"+ time-- +"秒");
+			if(time<0) noMore();
+		},1000); // show time
+	}
+*/	vm.exec.apply(vm,["Xmi Cx! 1 Dx! begin 20 ms Dx@ Cx+! Cx@ Xmi < Cx@ Xma > or if 0 Dx@ - Dx! then again"])
 	vm.exec.apply(vm,["xmi cx! 1 dx! begin 15 ms dx@ cx+! cx@ xmi < cx@ xma > or if 0 dx@ - dx! then again"])
 }
 window._2048={init:init,halt:halt,go:go,toUp:toUp,toLeft:toLeft,toRight:toRight,toDown:toDown};
