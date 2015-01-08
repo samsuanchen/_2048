@@ -3,9 +3,11 @@
 <title>_2048 Swipe</title>
 <script type="text/javascript" src="d3.js"></script>
 <script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="react-with-addons.js"></script>
 <script type="text/javascript" src="jquery.touchSwipe.min.js"></script>
-<link rel="stylesheet" type="text/css" href="build.css">
+<link rel="stylesheet" type="text/css" href="_2048.css">
 </head><body id='body' onresize="doResize()">
+<div id="main"></div>
 <h4>鍵盤上 按 <font color=blue>↑ ↓ ← → 鍵</font> 或 <font color=blue>w s a d 鍵</font> 或<br/>
 	手指在 表格 之中 向 <font color=blue>上下左右 滑動</font><br/>
 	數值都依方向移動 碰相同值就相加<br/>
@@ -41,14 +43,8 @@
 	<circle id='c1' r=50 cx=50 cy=50></circle>
 	<circle id='c2' r=9 cx=50 cy=9 fill='#700'></circle>
 </svg>
-<script type="text/javascript" src="build.js"></script>
+<script type="text/javascript" src="bundle.js"></script>
 <script>
-	function doResize(){
-		var body=document.getElementsByTagName('body')[0];
-    	var width=body.clientWidth ||document.clientWidth ||window.innerWidth;
-    	svg.setAttribute('width',width);
-	}
-	_2048.init();
-	doResize();
+	
 </script>
 </body></html>
