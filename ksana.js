@@ -7,6 +7,7 @@ jsonp_handler({
  "baseurl": "http://rawgit.com/samsuanchen/_2048/master/",
  "description": "",
  "files": [
+  "react-with-addons.js",
   "jquery.touchSwipe.min.js",
   "jquery.js",
   "d3.js",
